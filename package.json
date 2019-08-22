@@ -1,0 +1,22 @@
+{
+  "name": "dazaar-vision",
+  "version": "0.0.0",
+  "description": "Live stream video/audio over Dazaar",
+  "main": "index.js",
+  "dependencies": {
+    "hui": "^1.2.5",
+    "media-recorder-stream": "^2.1.1",
+    "pump": "^3.0.0",
+    "webm-cluster-stream": "^1.0.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bitfinexcom/dazaar-vision.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bitfinexcom/dazaar-vision/issues"
+  },
+  "homepage": "https://github.com/bitfinexcom/dazaar-vision"
+}
