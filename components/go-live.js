@@ -131,6 +131,7 @@ class SelectDevice extends Component {
   }
 
   _populate () {
+    if (!this._vid) return
     const v = []
     const a = []
     for (let i = 0; i < this.devices.length; i++) {
