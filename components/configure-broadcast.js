@@ -129,6 +129,12 @@ module.exports = class ConfigureBroadcast extends Component {
     </div>`
 
     el.querySelector('button').onclick = () => {
+      const val = this.value
+
+      if (val.payment && (!val.payment.payTo || !val.payment.amount)) {
+        return
+      }
+
       this.onlive(this._feed || this._createFeed(null), this.value)
       this._feed = null
     }
