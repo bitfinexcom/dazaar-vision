@@ -45,8 +45,8 @@ module.exports = class ConfigureBroadcast extends Component {
       this._updateSelling = false
       this._sellingEl.innerHTML = ''
       this._sellingEl.appendChild(html`<option value="">Create new stream</option>`)
-      for (const key of this._selling) {
-        this._sellingEl.appendChild(html`<option value="${key.toString('hex')}">>${key.toString('hex')}</option>`)
+      for (const { feed, key } of this._selling) {
+        this._sellingEl.appendChild(html`<option value="${feed.toString('hex')}">>${key.toString('hex')}</option>`)
       }
     }
   }

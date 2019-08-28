@@ -77,7 +77,7 @@ module.exports = class Broadcast extends MorphComponent {
         }))
       }
 
-      record(opts, (err, stream) => {
+      record(opts.device, (err, stream) => {
         if (err) return
         if (!this.feed) return stream.destroy()
         this.recording = stream

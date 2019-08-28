@@ -32,7 +32,7 @@ module.exports = class ChooseSubscription extends Component {
     this.dazaar.ready(() => this.update())
     this.dazaar.buying((err, list) => {
       if (err) return
-      this._list = list
+      this._list = list.map(({ key }) => key)
       this._updateBuying = true
       this.update()
     })
