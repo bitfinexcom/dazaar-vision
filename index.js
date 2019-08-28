@@ -72,7 +72,7 @@ const cls = css`
   }
 
   :host input {
-    border: none;
+    border: 1px solid #b0b0b0;
     padding: 5px;
     outline: none;
   }
