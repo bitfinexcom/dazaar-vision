@@ -4,12 +4,23 @@
   "description": "Live stream video/audio over Dazaar",
   "main": "index.js",
   "dependencies": {
+    "dazaar": "github:bitfinexcom/dazaar",
+    "dazaar-payment": "github:bitfinexcom/dazaar-payment",
     "hui": "^1.2.5",
+    "hypercore": "^7.6.1",
+    "hypercore-crypto": "^1.0.0",
     "media-recorder-stream": "^2.1.1",
+    "prettier-bytes": "^1.0.4",
     "pump": "^3.0.0",
     "webm-cluster-stream": "^1.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "nanotron": "^2.2.0",
+    "vhs-tape": "^3.2.0"
+  },
+  "scripts": {
+    "start": "nanotron -e memcpy -e encoding index.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/bitfinexcom/dazaar-vision.git"
