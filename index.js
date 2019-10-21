@@ -135,6 +135,7 @@ function broadcast () {
       const seller = dazaar.sell(feed, {
         validate (remoteKey, done) {
           console.log('validate', remoteKey, payment)
+          if (!payment) return done(null, { type: 'free' })
           pay.validate(remoteKey, function (err, info) {
             console.log('done', err, info)
             done(err, info)
@@ -142,7 +143,7 @@ function broadcast () {
         }
       })
       seller.ready(function () {
-        if (!Array.isArray(payment)) payment = [payment]
+        if (payment && !Array.isArray(payment)) payment = [payment]
         pay = new Payment(seller.key, payment)
       })
       const b = new Broadcast({
