@@ -239,6 +239,7 @@ module.exports = class Broadcast extends Component {
         card.payment = [this.options.payment]
       }
 
+      console.log(JSON.stringify(card, null, 2))
       clipboard.writeText(JSON.stringify(card, null, 2), 'selection')
     })
   }
