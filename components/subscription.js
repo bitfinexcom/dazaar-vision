@@ -262,13 +262,13 @@ module.exports = class Subscription extends Component {
   gotoStart () {
     this._gotoEnd = false
     if (this._serverStream) this._serverStream.destroy()
-    this.start()
+    if (this._server) this.start()
   }
 
   gotoEnd () {
     this._gotoEnd = true
     if (this._serverStream) this._serverStream.destroy()
-    this.start()
+    if (this._server) this.start()
   }
 
   buy (amount) {
