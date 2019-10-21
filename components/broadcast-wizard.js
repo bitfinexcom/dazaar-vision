@@ -57,7 +57,7 @@ class PaymentWizard extends Component {
     super()
     this._select = s
     this._amount = new Input({ placeholder: 'Amount' })
-    this._currency = new Select([['EOS', 'EOS'], ['Free', 'free']], { placeholder: 'Currency', border: true })
+    this._currency = new Select([['EOS', 'EOS'], ['EOS Testnet', 'EOS Testnet'], ['Free', 'free']], { placeholder: 'Currency', border: true })
     this._perUnit = new Input({ placeholder: 'Per time interval' })
     this._timeUnit = new Select([['Seconds', 'seconds'], ['Minutes', 'minutes'], ['Hours', 'hours']], { border: true })
     this._payTo = new Input({ placeholder: 'Pay to address', class: 'wide' })
@@ -208,7 +208,7 @@ class QualityWizard extends Component {
     return valid
 
     function notEmpty (el) {
-      if (!el.value) {
+      if (!el.value && el.value !== 0) {
         el.error = true
         valid = false
       } else {
