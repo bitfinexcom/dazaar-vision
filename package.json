@@ -1,8 +1,9 @@
 {
-  "name": "Dazaar Vision",
+  "name": "dazaar-vision",
   "version": "0.0.0",
   "description": "Live stream video/audio over Dazaar",
   "main": "index.js",
+  "title": "Dazaar Vision",
   "dependencies": {
     "dazaar": "github:bitfinexcom/dazaar",
     "dazaar-payment": "github:bitfinexcom/dazaar-payment",
