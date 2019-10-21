@@ -1,5 +1,5 @@
 {
-  "name": "dazaar-vision",
+  "name": "Dazaar Vision",
   "version": "0.0.0",
   "description": "Live stream video/audio over Dazaar",
   "main": "index.js",
