@@ -1,0 +1,29 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body.modern {
+  background-color: rgba(211, 76, 80, 0.1) !important;
+  overflow: hidden;
+}
+
+.modern *, .modern input[type=submit] {
+  font-family: 'Anonymous Pro';
+  font-style: normal;
+  font-weight: normal;
+}
+
+.modern input, .modern select {
+  font-family: 'Open Sans'
+}
+
+@font-face {
+  font-family: 'Anonymous Pro';
+  src: url('./assets/AnonymousPro-Regular.woff2') format('woff2')
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url('./assets/OpenSans-Regular.woff2') format('woff2')
+}

@@ -1,126 +1,232 @@
-const Component = require('hui')
-const html = require('hui/html')
+const Button = require('./button')
 const css = require('hui/css')
-const prettierBytes = require('prettier-bytes')
+const html = require('hui/html')
+const Component = require('hui')
+const Input = require('./input')
 const pump = require('pump')
+const prettierBytes = require('prettier-bytes')
+const { ipcRenderer } = require('electron')
+const prettyMilliseconds = require('pretty-ms')
 
-const cls = css`
-  :host video {
-    width: 100%;
-    height: 100%;
-  }
+let ID = 0
+const REPLY = new Map()
 
+ipcRenderer.on('scatter-reply', function (event, data) {
+  const id = data.id
+  const cb = REPLY.get(id)
+  REPLY.delete(id)
+  const error = data.error ? new Error(data.error) : null
+  if (cb) cb(error)
+})
+
+const style = css`
   :host {
     position: relative;
   }
 
-  :host {
-    background-color: black;
+  :host video {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background: black;
   }
 
-  :host .info-box {
-    left: 10px;
-    top: 10px;
-  }
-
-  :host .controls {
-    right: 10px;
-    bottom: 10px;
-  }
-
-  :host .info-box, :host .controls button {
-    background-color: gray;
-    outline: none;
-    padding: 10px;
-    color: white;
-    font-family: monospace;
-    font-weight: bold;
-  }
-
-  :host .controls button {
-    margin-left: 10px;
+  :host h1 {
+    margin: 0;
+    color: #ffffff;
+    text-align: center;
+    width: 100%;
+    font-size: 35px;
+    line-height: 70px;
+    text-align: center;
+    letter-spacing: 0.02em;
+    user-select: none;
+    margin-bottom: 30px;
   }
 
   :host .overlay {
-    z-index: 10;
-    position: absolute;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.25s ease;
+    background: rgba(0, 0, 0, 0.2);
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
   }
 
+  :host.active .overlay,
   :host:hover .overlay {
-    opacity: 0.90;
+    opacity: 1;
+  }
+
+  :host .overlay .bottom-right {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    margin: 10px;
+  }
+
+  :host .overlay .top-right {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 10px;
+  }
+
+  :host .overlay .top-left {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 10px;
+  }
+
+  :host .overlay .bottom-left {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    margin: 10px;
+  }
+
+  :host .info {
+    border-radius: 4px;
+    background: rgba(92, 92, 108, 1);
+    padding: 10px;
+    color: #ffffff;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0.02em;
+    text-align: center;
+  }
+
+  :host .info h3 {
+    margin: 0;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+
+  :host .overlay .bottom-right button {
+    margin-left: 10px;
+  }
+
+  :host ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  :host input {
+    padding: 10px;
+    border-color: white;
+    width: 190px;
+  }
+
+  :host .overlay .middle {
+    position: absolute;
+    top: calc(50% - 35px);
+    left: 0;
+    right: 0;
   }
 `
 
 module.exports = class Subscription extends Component {
-  constructor (dazaar, key, ondone) {
+  constructor (opts) {
     super()
-
-    this.ondone = ondone || noop
-    this.buyer = dazaar.buy(key, { sparse: true })
-    this.feed = null
-    this.swarm = null
-    this.downloaded = 0
-    this.currentFrame = 0
-    this.description = ''
-
-    this.buyer.once('feed', feed => {
-      this.feed = feed
-      this._onfeed()
-      this.update()
-    })
-
-    this._gotoEnd = true
+    this.options = opts
+    this.buyer = this.options.buyer
+    this.onstop = this.options.onstop || noop
+    this._desc = html`<span>Waiting for description</span>`
+    this._info = html`<span>Waiting for remote info</span>`
+    this._downloaded = html`<span>0B</span>`
+    this._peers = html`<span>0</span>`
     this._server = null
+    this._gotoEnd = true
+    this.currentFrame = 0
     this._serverStream = null
-    this._peersEl = null
-    this._keyframesEl = null
-    this._downloadedEl = null
-    this._currentFrameEl = null
-    this._infoEl = null
-    this._descEl = null
+    this._amount = null
+    this._timeout = null
+    this.downloadBytes = 0
+    this._payInfo = html`<span></span>`
+    this._payInfoHide = null
+    this.swarm = null
+    this._subscribe()
   }
 
-  _onfeed () {
-    if (!this.feed || !this.loaded) return
-    const update = this.update.bind(this)
+  _subscribe () {
+    const self = this
 
-    this.feed.get(0, (_, data) => {
-      if (data) {
-        try {
-          const info = JSON.parse(data)
-          if (info.description) this.description = info.description
-          this.update()
-        } catch (_) {}
-      }
+    if (this.buyer.feed) onfeed(this.buyer.feed)
+    else this.buyer.on('feed', () => onfeed(this.buyer.feed))
+
+    this.buyer.ready(() => {
+      this.swarm = require('dazaar/swarm')(this.buyer)
     })
 
-    this.on(this.buyer, 'valid', update)
-    this.on(this.feed, 'append', update)
-    this.on(this.feed, 'download', (index, data) => {
-      this.downloaded += data.length
-      this.update()
+    let hoverState = false
+
+    this.buyer.on('invalid', (err) => {
+      this._info.innerText = err.message
+      this.element.classList.add('active')
+      hoverState = true
+      clearTimeout(this._timeout)
     })
 
-    if (this._server) return
-    this._server = require('http').createServer(this._onrequest.bind(this))
-    this._server.listen(0, '127.0.0.1')
-    this.once(this._server, 'listening', this.start.bind(this))
+    this.buyer.on('valid', (info) => {
+      this._info.innerText = infoMessage(info)
+      if (!hoverState) return
+      this._timeout = setTimeout(() => this.element.classList.remove('active'))
+    })
+
+    function onfeed (feed) {
+      feed.get(0, (_, data) => {
+        if (data) {
+          try {
+            const info = JSON.parse(data)
+            // TODO: raf me
+            if (info.description) self._desc.innerText = info.description
+          } catch (_) {}
+        }
+      })
+
+      feed.on('download', function (index, data) {
+        self.downloadBytes += data.length
+        self.update()
+      })
+
+      feed.on('peer-add', function () {
+        self.update()
+      })
+
+      feed.on('peer-remove', function () {
+        self.update()
+      })
+
+      if (self._server) return
+      self._server = require('http').createServer(self._onrequest.bind(self))
+      self._server.listen(0, '127.0.0.1')
+      self.once(self._server, 'listening', self.start.bind(self))
+    }
+  }
+
+  render () {
+    this._downloaded.innerText = prettierBytes(this.downloadBytes)
+    if (this.buyer.feed) this._peers.innerText = this.buyer.feed.peers.length
   }
 
   _onrequest (req, res) {
-    this.feed.get(1, (err, data) => {
+    const feed = this.buyer.feed
+    feed.get(1, (err, data) => {
       if (err || !this.loaded) return res.destroy()
       res.write(data)
 
-      this.feed.update({ ifAvailable: true }, () => {
+      feed.update({ ifAvailable: true }, () => {
         if (!this.loaded) return res.destroy()
 
-        let start = Math.max(2, this.feed.length - 1)
+        let start = Math.max(2, feed.length - 1)
         if (!this._gotoEnd) start = 2
 
-        const stream = this.feed.createReadStream({
+        const stream = feed.createReadStream({
           start,
           live: true
         })
@@ -140,20 +246,19 @@ module.exports = class Subscription extends Component {
     })
   }
 
-  onload () {
-    const update = this.update.bind(this)
-    this.swarm = require('dazaar/swarm')(this.buyer)
-    this.on(this.swarm, 'connection', update)
-    this.on(this.swarm, 'disconnection', update)
-    this._onfeed()
+  start () {
+    const video = this.element.querySelector('video')
+    video.src = 'http://127.0.0.1:' + this._server.address().port
+    video.play()
   }
 
-  onunload () {
-    this.swarm.destroy()
-    this.swarm = null
+  stop () {
+    if (this.buyer.feed) this.buyer.feed.close()
+    if (this.swarm) this.swarm.destroy()
     if (this._server) this._server.close()
-    if (this._serverStream) this._serverStream.destroy()
-    this._server = this._serverStream = null
+    const video = this.element.querySelector('video')
+    video.src = ''
+    this.onstop()
   }
 
   gotoStart () {
@@ -168,88 +273,74 @@ module.exports = class Subscription extends Component {
     this.start()
   }
 
-  start () {
-    if (!this.element) return
+  buy (amount) {
+    const id = ID++
 
-    const video = this.element.querySelector('video')
-    video.src = 'http://127.0.0.1:' + this._server.address().port
-    video.play()
-  }
+    ipcRenderer.send('scatter', {
+      id,
+      seller: this.buyer.seller.toString('hex'),
+      buyer: this.buyer.key.toString('hex'),
+      amount,
+      payment: this.options.payment
+    })
 
-  stop () {
-    if (!this.element) return
-    const video = this.element.querySelector('video')
-    video.pause()
-    video.src = ''
-  }
+    REPLY.set(id, (err) => {
+      this._amount.value = ''
+      if (err) this._payInfo.innerText = err.message
+      else this._payInfo.innerText = 'Payment succeeded! Please wait.'
 
-  destroy () {
-    this.stop()
-    this.ondone(null)
-  }
-
-  render () {
-    if (!this._peersEl) return
-
-    this._peersEl.innerText = this.swarm.connections.size
-    if (this.feed) this._keyframesEl.innerText = this.feed.length
-    this._downloadedEl.innerText = prettierBytes(this.downloaded)
-    this._currentFrameEl.innerText = this.currentFrame
-
-    let expires = 'Waiting for remote info ...'
-
-    if (this.feed) {
-      if (this.buyer.info) {
-        const info = this.buyer.info
-        if (info.type === 'free') {
-          expires = 'Stream is free of charge'
-        } else if (info.type === 'time') {
-          expires = 'Subscription expires in ' + info.remaining + ' ms'
-        } else {
-          expires = 'Unknown subscription type: ' + info.type
-        }
-      } else {
-        expires = 'Remote did not share any subscription info'
-      }
-    }
-
-    this._infoEl.innerText = expires
-    if (this.description) this._descEl.innerText = '"' + this.description + '"'
+      clearTimeout(this._payInfoHide)
+      this._payInfoHide = setTimeout(() => {
+        this._payInfo.innerText = ''
+      }, 6000)
+    })
   }
 
   createElement () {
-    this._peersEl = html`<span>0</span>`
-    this._keyframesEl = html`<span>0</span>`
-    this._downloadedEl = html`<span>0 b</span>`
-    this._currentFrameEl = html`<span>0</span>`
-    this._infoEl = html`<span>Waiting for remote info ...</span>`
-    this._descEl = html`<span>unknown stream</span>`
-
+    const amount = this._amount = new Input({ placeholder: 'Enter amount, ie. 0.1234 EOS' })
     return html`
-      <div class="${cls}">
-        <div class="overlay info-box">
-          Watching ${this._descEl}<br>
-          Connected to ${this._peersEl} peer(s)<br>
-          Downloaded ${this._downloadedEl}<br>
-          ${this._infoEl}<br>
-          Stream contains ${this._keyframesEl} key frames<br>
-          You are watching frame ~${this._currentFrameEl}<br>
-        </div>
-        <div class="overlay controls">
-          <button onclick=${this.gotoStart.bind(this)}>
-            Goto start
-          </button>
-          <button onclick=${this.gotoEnd.bind(this)}>
-            Goto end
-          </button>
-          <button onclick=${this.destroy.bind(this)}>
-            Stop watching
-          </button>
-        </div>
+      <div class="${style}">
         <video></video>
+        <div class="overlay">
+          <div class="top-right">
+            ${new Button('Stop watching', { onclick: this.stop.bind(this) }).element}
+          </div>
+          <div class="bottom-right">
+            ${new Button('Go to start', { border: true, onclick: this.gotoStart.bind(this) }).element}
+            ${new Button('Go to end', { border: true, onclick: this.gotoEnd.bind(this) }).element}
+          </div>
+          <div class="middle" style="text-align: center;">
+            <h1>${this._info}</h1>
+            <h3 style="color: white;">${this._payInfo}</h3>
+          </div>
+          <div class="info top-left">
+            <h3>${this._desc}</h3>
+            <ul>
+              <li>Connected to ${this._peers} peer(s)</li>
+              <li>Downloaded ${this._downloaded}</li>
+            </ul>
+          </div>
+          <div class="bottom-left" style="${this.options.payment ? '' : 'display: none;'}">
+            ${amount.element} ${new Button('Buy using Scatter App', { onclick: () => this.buy(amount.value) }).element}
+          </div>
+        </div>
       </div>
     `
   }
 }
 
 function noop () {}
+
+function infoMessage (info) {
+  if (info) {
+    if (info.type === 'free') {
+      return 'Stream is free of charge'
+    } else if (info.type === 'time') {
+      return 'Subscription expires in ' + prettyMilliseconds(info.remaining, {compact: true})
+    } else {
+      return 'Unknown subscription type: ' + info.type
+    }
+  } else {
+    return 'Remote did not share any subscription info'
+  }
+}

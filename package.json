@@ -6,11 +6,13 @@
   "dependencies": {
     "dazaar": "github:bitfinexcom/dazaar",
     "dazaar-payment": "github:bitfinexcom/dazaar-payment",
+    "dazaar-scatter-pay": "github:bitfinexcom/dazaar-scatter-pay",
     "hui": "^1.2.5",
-    "hypercore": "^7.6.1",
+    "hypercore": "^8.2.5",
     "hypercore-crypto": "^1.0.0",
     "media-recorder-stream": "^2.1.1",
     "prettier-bytes": "^1.0.4",
+    "pretty-ms": "^5.0.0",
     "pump": "^3.0.0",
     "webm-cluster-stream": "^1.0.0"
   },
