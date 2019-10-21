@@ -138,7 +138,7 @@ module.exports = class Subscription extends Component {
     this.onstop = this.options.onstop || noop
     this._desc = html`<span>Waiting for description</span>`
     this._info = html`<span>Waiting for remote info</span>`
-    this._downloaded = html`<span>0B</span>`
+    this._downloaded = html`<span>0 B</span>`
     this._peers = html`<span>0</span>`
     this._server = null
     this._gotoEnd = true
@@ -161,6 +161,12 @@ module.exports = class Subscription extends Component {
 
     this.buyer.ready(() => {
       this.swarm = require('dazaar/swarm')(this.buyer)
+      this.swarm.on('connection', () => {
+        this.update()
+      })
+      this.swarm.on('disconnection', () => {
+        this.update()
+      })
     })
 
     let hoverState = false
@@ -194,14 +200,6 @@ module.exports = class Subscription extends Component {
         self.update()
       })
 
-      feed.on('peer-add', function () {
-        self.update()
-      })
-
-      feed.on('peer-remove', function () {
-        self.update()
-      })
-
       if (self._server) return
       self._server = require('http').createServer(self._onrequest.bind(self))
       self._server.listen(0, '127.0.0.1')
@@ -211,7 +209,7 @@ module.exports = class Subscription extends Component {
 
   render () {
     this._downloaded.innerText = prettierBytes(this.downloadBytes)
-    if (this.buyer.feed) this._peers.innerText = this.buyer.feed.peers.length
+    this._peers.innerText = this.swarm ? this.swarm.connections.size : 0
   }
 
   _onrequest (req, res) {

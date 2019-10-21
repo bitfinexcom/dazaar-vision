@@ -35,6 +35,7 @@ class SelectStreamWizard extends Component {
 
   onchange () {
     const v = this.select.value
+    if (!v) return
     const card = {
       id: v.key.toString('hex'),
       description: v.description || "",

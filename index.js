@@ -129,12 +129,16 @@ function broadcast () {
       })
     },
     ondone () {
-      const [ existing, payment, devices ] = bw.value
+      let [ existing, payment, devices ] = bw.value
       const feed = createFeed(existing && existing.feed)
       let pay = null
       const seller = dazaar.sell(feed, {
         validate (remoteKey, done) {
-          pay.validate(remoteKey, done)
+          console.log('validate', remoteKey, payment)
+          pay.validate(remoteKey, function (err, info) {
+            console.log('done', err, info)
+            done(err, info)
+          })
         }
       })
       seller.ready(function () {

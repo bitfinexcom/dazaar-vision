@@ -115,7 +115,7 @@ module.exports = class Broadcast extends Component {
     this.recording = null
     this._server = null
     this.uploadedBytes = 0
-    this._uploaded = html`<span>0B</span>`
+    this._uploaded = html`<span>0 B</span>`
     this._peers = html`<span>0</span>`
     this._record()
   }
@@ -123,17 +123,11 @@ module.exports = class Broadcast extends Component {
   _record () {
     const feed = this.seller.feed
 
-    feed.on('download', (index, data) => {
-      this.uploadedBytes += data.length
-      this.update()
-    })
-
-    feed.on('peer-add', () => {
-      this.update()
-    })
-
-    feed.on('peer-remove', () => {
-      this.update()
+    this.seller.on('buyer-feed', (feed) => {
+      feed.on('upload', (index, data) => {
+        this.uploadedBytes += data.length
+        this.update()
+      })
     })
 
     feed.ready((err) => {
@@ -163,15 +157,19 @@ module.exports = class Broadcast extends Component {
         this._server.listen(0, '127.0.0.1')
         this.once(this._server, 'listening', this.start.bind(this))
         this.swarm = require('dazaar/swarm')(this.seller)
-        // this.swarm.on('connection', update)
-        // this.swarm.on('disconnection', update)
+        this.swarm.on('connection', () => {
+          this.update()
+        })
+        this.swarm.on('disconnection', () => {
+          this.update()
+        })
       })
     })
   }
 
   render () {
     this._uploaded.innerText = prettierBytes(this.uploadedBytes)
-    this._peers.innerText = this.seller.feed.peers.length
+    this._peers.innerText = this.swarm ? this.swarm.connections.size : 0
   }
 
   _onrequest (req, res) {
