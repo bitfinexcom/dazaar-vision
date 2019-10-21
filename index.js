@@ -91,6 +91,9 @@ let view = main
 
 document.body.appendChild(main)
 
+// Export mute functions
+window.mute = mute
+
 function subscribe () {
   const sw = new SubscribeWizard({
     list (cb) {
@@ -167,6 +170,11 @@ function broadcast () {
   })
 
   changeMainView(bw.element)
+}
+
+function mute () {
+  const v = document.querySelector('video')
+  if (v) v.muted = true
 }
 
 function changeMainView (el) {
