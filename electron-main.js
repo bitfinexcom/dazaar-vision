@@ -5,16 +5,7 @@ const path = require('path')
 const { BrowserWindow, app } = electron
 let win
 
-if (fs.existsSync('package.json')) {
-  try {
-    const pkg = require(path.resolve('package.json'))
-    app.setName(pkg.title || pkg.name || 'Nanotron')
-  } catch (_) {
-    app.setName('Nanotron')
-  }
-} else {
-  app.setName('Nanotron')
-}
+app.setName('Dazaar Vision')
 
 app.on('ready', function () {
   win = new BrowserWindow({
@@ -23,8 +14,11 @@ app.on('ready', function () {
     }
   })
   win.loadURL('file://' + require.resolve('./index.html'))
-  win.webContents.on('did-finish-load', () => win.webContents.openDevTools({ mode: 'detach' }))
-  win.webContents.on('context-menu', onContextMenu)
+
+  if (process.argv.includes('--dev-tools')) {
+    win.webContents.on('did-finish-load', () => win.webContents.openDevTools({ mode: 'detach' }))
+    win.webContents.on('context-menu', onContextMenu)
+  }
 })
 
 require('./electron')
