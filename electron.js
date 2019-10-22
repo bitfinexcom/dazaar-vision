@@ -15,3 +15,8 @@ ipcMain.on('scatter', (event, data) => {
     event.sender.send('scatter-reply', { id: data.id })
   })
 })
+
+process.on('unhandledRejection', function (err) {
+  console.error('Unhandled rejection', err)
+  cache.clear()
+})
