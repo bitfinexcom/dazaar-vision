@@ -2,3 +2,5 @@ dazaar-vision-data
 node_modules
 sandbox.js
 *.bundle.js
+.DS_Store
+dist

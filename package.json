@@ -2,8 +2,39 @@
   "name": "dazaar-vision",
   "version": "0.0.0",
   "description": "Live stream video/audio over Dazaar",
-  "main": "index.js",
+  "main": "electron-main.js",
   "title": "Dazaar Vision",
+  "browserify": {
+    "transform": [
+      "hui/css",
+      "hui/html"
+    ]
+  },
+  "build": {
+    "copyright": "© 2019,BitfinexS",
+    "artifactName": "${productName}.${ext}",
+    "appId": "com.bitfinex.dazaarvision",
+    "productName": "Dazaar Vision",
+    "mac": {
+      "category": "public.app-category.business",
+      "target": "dir"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Office"
+    },
+    "files": [
+      "lib/**",
+      "global.css",
+      "components/**",
+      "assets/**",
+      "index.js",
+      "index.bundle.js",
+      "electron.js",
+      "electron-main.js",
+      "index.html"
+    ]
+  },
   "dependencies": {
     "dazaar": "github:bitfinexcom/dazaar",
     "dazaar-payment": "github:bitfinexcom/dazaar-payment",
@@ -18,11 +49,16 @@
     "webm-cluster-stream": "^1.0.0"
   },
   "devDependencies": {
+    "browserify": "^16.5.0",
+    "electron-builder": "^21.2.0",
     "nanotron": "^2.2.0",
     "vhs-tape": "^3.2.0"
   },
   "scripts": {
-    "start": "nanotron -e memcpy -e encoding index.js"
+    "debug": "nanotron -e memcpy -e encoding index.js",
+    "build": "browserify -u memcpy -u encoding index.js -u electron --node > index.bundle.js",
+    "dist": "npm run build && electron-builder --publish=never",
+    "start": "electron electron-main.js"
   },
   "repository": {
     "type": "git",

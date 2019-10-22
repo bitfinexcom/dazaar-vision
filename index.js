@@ -7,8 +7,14 @@ const Broadcast = require('./components/broadcast')
 const Subscription = require('./components/subscription')
 const hypercore = require('hypercore')
 const crypto = require('hypercore-crypto')
-const dazaar = require('dazaar')('dazaar-vision-data')
+const electron = require('electron')
+const path = require('path')
+const userDataPath = (electron.app || electron.remote.app).getPath('userData');
+const dataPath = path.join(userDataPath, './dazaar-vision-data')
+const dazaar = require('dazaar')(dataPath)
 const Payment = require('dazaar-payment')
+
+console.log('Storing data in', dataPath)
 
 const style = css`
   @keyframes heartbeat {
