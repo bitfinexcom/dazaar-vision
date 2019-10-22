@@ -240,7 +240,7 @@ module.exports = class Broadcast extends Component {
       }
 
       console.log(JSON.stringify(card, null, 2))
-      clipboard.writeText(JSON.stringify(card, null, 2), 'selection')
+      clipboard.writeText(JSON.stringify(card, null, 2))
     })
   }
 
