@@ -39,7 +39,6 @@
     "dazaar": "github:bitfinexcom/dazaar",
     "dazaar-payment": "github:bitfinexcom/dazaar-payment",
     "dazaar-scatter-pay": "github:bitfinexcom/dazaar-scatter-pay",
-    "electron": "^4.2.12",
     "hui": "^1.2.5",
     "hypercore": "^8.2.5",
     "hypercore-crypto": "^1.0.0",
@@ -52,6 +51,7 @@
   "devDependencies": {
     "browserify": "^16.5.0",
     "electron-builder": "^21.2.0",
+    "electron": "^4.2.12",
     "nanotron": "^2.2.0",
     "vhs-tape": "^3.2.0"
   },
