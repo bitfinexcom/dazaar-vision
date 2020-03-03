@@ -2,7 +2,7 @@ const Component = require('hui')
 const html = require('hui/html')
 const css = require('hui/css')
 
-const style = css `
+const style = css`
   :host {
     font-family: Open Sans;
     font-weight: 600;
@@ -11,10 +11,10 @@ const style = css `
     padding: 1.2rem 2.5rem;
     text-align: center;
     letter-spacing: 0.05em;
-    background-color: #E83D4A;
+    background-color: #e83d4a;
     border-radius: 2.5rem;
     border: none;
-    color: #FFFFFF;
+    color: #ffffff;
     outline: none;
     transition: background-color 0.25s ease;
     user-select: none;
@@ -30,9 +30,9 @@ const style = css `
   }
 
   :host.border {
-    border: 2px solid #D34C50;
+    border: 2px solid #d34c50;
     background-color: #353248;
-    color: #D34C50;
+    color: #d34c50;
   }
 
   :host.border:disabled {
@@ -46,25 +46,32 @@ const style = css `
 `
 
 module.exports = class Button extends Component {
-    constructor(text, opts) {
-        if (typeof opts === 'function') {
-            onclick = opts
-            opts = {}
-        }
-
-        if (!opts) opts = {}
-
-        super()
-
-        this.text = text || ''
-        this.onclick = opts.onclick || noop
-        this.border = !!opts.border
-        this.class = opts.class
+  constructor (text, opts) {
+    if (typeof opts === 'function') {
+      onclick = opts
+      opts = {}
     }
 
-    createElement() {
-        return html `<button class="${style} ${this.border ? 'border' : ''} ${this.class || ''}" onclick=${this.onclick}>${this.text}</button>`
-    }
+    if (!opts) opts = {}
+
+    super()
+
+    this.text = text || ''
+    this.onclick = opts.onclick || noop
+    this.border = !!opts.border
+    this.class = opts.class
+  }
+
+  createElement () {
+    return html`
+      <button
+        class="${style} ${this.border ? 'border' : ''} ${this.class || ''}"
+        onclick=${this.onclick}
+      >
+        ${this.text}
+      </button>
+    `
+  }
 }
 
-function noop() {}
+function noop () {}

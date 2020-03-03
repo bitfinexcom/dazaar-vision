@@ -8,7 +8,7 @@ const pump = require('pump')
 const cluster = require('webm-cluster-stream')
 const prettierBytes = require('prettier-bytes')
 
-const style = css `
+const style = css`
   :host {
     position: relative;
   }
@@ -32,7 +32,8 @@ const style = css `
     top: 0;
   }
 
-  :host:hover .overlay, :host.active .overlay {
+  :host:hover .overlay,
+  :host.active .overlay {
     opacity: 1;
   }
 
@@ -105,160 +106,177 @@ const style = css `
 `
 
 module.exports = class Broadcast extends Component {
-    constructor(opts) {
-        super()
-        this.options = opts || {}
-        this.seller = opts.seller
-        this.onstop = this.options.onstop || noop
-        this.timeout = null
-        this.recording = null
-        this._server = null
-        this.uploadedBytes = 0
-        this._uploaded = html `<span>0 B</span>`
-        this._peers = html `<span>0</span>`
-        this._record()
-    }
+  constructor (opts) {
+    super()
+    this.options = opts || {}
+    this.seller = opts.seller
+    this.onstop = this.options.onstop || noop
+    this.timeout = null
+    this.recording = null
+    this._server = null
+    this.uploadedBytes = 0
+    this._uploaded = html`
+      <span>0 B</span>
+    `
+    this._peers = html`
+      <span>0</span>
+    `
+    this._record()
+  }
 
-    _record() {
-        const feed = this.seller.feed
+  _record () {
+    const feed = this.seller.feed
 
-        this.seller.on('buyer-feed', (feed) => {
-            feed.on('upload', (index, data) => {
-                this.uploadedBytes += data.length
-                this.update()
-            })
-        })
+    this.seller.on('buyer-feed', feed => {
+      feed.on('upload', (index, data) => {
+        this.uploadedBytes += data.length
+        this.update()
+      })
+    })
 
-        feed.ready((err) => {
-            if (err) return
-            if (feed.length === 0) {
-                feed.append(JSON.stringify({
-                    description: this.options.description,
-                    quality: this.options.quality,
-                    video: this.options.video.deviceId,
-                    audio: this.options.audio.deviceId,
-                    payment: this.options.payment
-                }))
-            }
+    feed.ready(err => {
+      if (err) return
+      if (feed.length === 0) {
+        feed.append(
+          JSON.stringify({
+            description: this.options.description,
+            quality: this.options.quality,
+            video: this.options.video.deviceId,
+            audio: this.options.audio.deviceId,
+            payment: this.options.payment
+          })
+        )
+      }
 
-            record({
-                quality: this.options.quality,
-                video: this.options.video,
-                audio: this.options.audio
-            }, (err, stream) => {
-                if (err) return
+      record(
+        {
+          quality: this.options.quality,
+          video: this.options.video,
+          audio: this.options.audio
+        },
+        (err, stream) => {
+          if (err) return
 
-                if (!this.seller) return stream.destroy()
-                this.recording = stream
-                pump(stream, cluster(), feed.createWriteStream())
+          if (!this.seller) return stream.destroy()
+          this.recording = stream
+          pump(stream, cluster(), feed.createWriteStream())
 
-                this._server = require('http').createServer(this._onrequest.bind(this))
-                this._server.listen(0, '127.0.0.1')
-                this.once(this._server, 'listening', this.start.bind(this))
-                this.swarm = require('dazaar/swarm')(this.seller)
-                this.swarm.on('connection', () => {
-                    this.update()
-                })
-                this.swarm.on('disconnection', () => {
-                    this.update()
-                })
-            })
-        })
-    }
-
-    render() {
-        this._uploaded.innerText = prettierBytes(this.uploadedBytes)
-        this._peers.innerText = this.swarm ? this.swarm.connections.size : 0
-    }
-
-    _onrequest(req, res) {
-        const self = this
-        this.recording.on('data', ondata)
-        res.on('close', done)
-        res.on('error', done)
-        res.on('end', done)
-        req.on('close', done)
-        req.on('error', done)
-        req.on('end', done)
-
-        function done() {
-            self.recording.removeListener('data', ondata)
+          this._server = require('http').createServer(
+            this._onrequest.bind(this)
+          )
+          this._server.listen(0, '127.0.0.1')
+          this.once(this._server, 'listening', this.start.bind(this))
+          this.swarm = require('dazaar/swarm')(this.seller)
+          this.swarm.on('connection', () => {
+            this.update()
+          })
+          this.swarm.on('disconnection', () => {
+            this.update()
+          })
         }
+      )
+    })
+  }
 
-        function ondata(data) {
-            res.write(data)
-        }
+  render () {
+    this._uploaded.innerText = prettierBytes(this.uploadedBytes)
+    this._peers.innerText = this.swarm ? this.swarm.connections.size : 0
+  }
+
+  _onrequest (req, res) {
+    const self = this
+    this.recording.on('data', ondata)
+    res.on('close', done)
+    res.on('error', done)
+    res.on('end', done)
+    req.on('close', done)
+    req.on('error', done)
+    req.on('end', done)
+
+    function done () {
+      self.recording.removeListener('data', ondata)
     }
 
-    start() {
-        const video = this.element.querySelector('video')
-        video.src = 'http://127.0.0.1:' + this._server.address().port
-        video.play()
+    function ondata (data) {
+      res.write(data)
     }
+  }
 
-    onload() {
-        this.element.classList.add('active')
-        this.timeout = setTimeout(() => {
-            this.element.classList.remove('active')
-        }, 5000)
-    }
+  start () {
+    const video = this.element.querySelector('video')
+    video.src = 'http://127.0.0.1:' + this._server.address().port
+    video.play()
+  }
 
-    onunload() {
-        clearTimeout(this.timeout)
-    }
+  onload () {
+    this.element.classList.add('active')
+    this.timeout = setTimeout(() => {
+      this.element.classList.remove('active')
+    }, 5000)
+  }
 
-    stop() {
-        if (this.recording) this.recording.destroy()
+  onunload () {
+    clearTimeout(this.timeout)
+  }
 
-        const video = this.element.querySelector('video')
-        video.src = ''
+  stop () {
+    if (this.recording) this.recording.destroy()
 
-        if (this.swarm) this.swarm.destroy()
-        this.seller.feed.close(() => {
-            this._server.close()
-            this._server.on('close', () => {
-                this.onstop()
-            })
-        })
-        this.seller = null
-    }
+    const video = this.element.querySelector('video')
+    video.src = ''
 
-    copy() {
-        if (!this.seller) return
-        this.seller.ready((err) => {
-            if (err) return
+    if (this.swarm) this.swarm.destroy()
+    this.seller.feed.close(() => {
+      this._server.close()
+      this._server.on('close', () => {
+        this.onstop()
+      })
+    })
+    this.seller = null
+  }
 
-            const card = {
-                id: this.seller.key.toString('hex'),
-                description: this.options.description,
-                payment: null
-            }
+  copy () {
+    if (!this.seller) return
+    this.seller.ready(err => {
+      if (err) return
 
-            if (this.options.payment) {
-                card.payment = [this.options.payment]
-            }
+      const card = {
+        id: this.seller.key.toString('hex'),
+        description: this.options.description,
+        payment: null
+      }
 
-            console.log(JSON.stringify(card, null, 2))
-            clipboard.writeText(JSON.stringify(card, null, 2))
-        })
-    }
+      if (this.options.payment) {
+        card.payment = [this.options.payment]
+      }
 
-    createElement() {
-        return html `
+      console.log(JSON.stringify(card, null, 2))
+      clipboard.writeText(JSON.stringify(card, null, 2))
+    })
+  }
+
+  createElement () {
+    return html`
       <div class="${style} active">
         <video></video>
         <div class="overlay">
           <div class="top-right">
-            ${new Button('Stop broadcasting', { onclick: this.stop.bind(this) }).element}
+            ${new Button('Stop broadcasting', { onclick: this.stop.bind(this) })
+              .element}
           </div>
           <div class="info top-left">
             <h3>${this.options.description || 'Video stream'}</h3>
             <ul>
               <li>Connected to ${this._peers} peer(s)</li>
               <li>Uploaded ${this._uploaded}</li>
-              <li>${this.options.payment ? 'You are charging for this stream' : 'Stream is free of charge'}</li>
+              <li>
+                ${this.options.payment
+                  ? 'You are charging for this stream'
+                  : 'Stream is free of charge'}
+              </li>
             </ul>
-            ${new Button('Copy Dazaar card', { onclick: this.copy.bind(this) }).element}
+            ${new Button('Copy Dazaar card', { onclick: this.copy.bind(this) })
+              .element}
           </div>
           <div class="middle" style="text-align: center;">
             <h1>You are broadcasting</h1>
@@ -266,5 +284,5 @@ module.exports = class Broadcast extends Component {
         </div>
       </div>
     `
-    }
+  }
 }

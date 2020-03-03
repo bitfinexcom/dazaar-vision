@@ -11,7 +11,10 @@ class SelectStreamWizard extends Component {
   constructor (list) {
     super()
     this.existing = []
-    this.select = new Select([['Paste new Dazaar card', null]], { class: 'wide', onchange: this.onchange.bind(this) })
+    this.select = new Select([['Paste new Dazaar card', null]], {
+      class: 'wide',
+      onchange: this.onchange.bind(this)
+    })
     if (list) {
       list((err, list) => {
         if (err) return
@@ -25,10 +28,18 @@ class SelectStreamWizard extends Component {
     const list = [['Paste new Dazaar card', null]]
     for (const e of this.existing) {
       let n = e.description
-      n += (n ? ' (' : '') + e.key.toString('hex').slice(0, 8) + '...' + e.key.toString('hex').slice(-4) + (n ? ')' : '')
+      n +=
+        (n ? ' (' : '') +
+        e.key.toString('hex').slice(0, 8) +
+        '...' +
+        e.key.toString('hex').slice(-4) +
+        (n ? ')' : '')
       list.push(['Resume ' + n, e])
     }
-    const s = new Select(list, { class: 'wide', onchange: this.onchange.bind(this) })
+    const s = new Select(list, {
+      class: 'wide',
+      onchange: this.onchange.bind(this)
+    })
     this.select.element.replaceWith(s.element)
     this.select = s
   }
@@ -38,8 +49,8 @@ class SelectStreamWizard extends Component {
     if (!v) return
     const card = {
       id: v.key.toString('hex'),
-      description: v.description || "",
-      payment: v.payment && [v.payment],
+      description: v.description || '',
+      payment: v.payment && [v.payment]
     }
     this.element.querySelector('textarea').value = JSON.stringify(card, null, 2)
   }
@@ -63,7 +74,11 @@ class SelectStreamWizard extends Component {
       <div>
         <div class="configs">
           ${this.select.element}
-          <textarea autofocus style="outline: none; border: 0.5px solid rgba(53, 50, 72, 0.5); display: block; border-radius: 4px; height: 200px;" class=wide></textarea>
+          <textarea
+            autofocus
+            style="outline: none; border: 0.5px solid rgba(53, 50, 72, 0.5); display: block; border-radius: 4px; height: 200px;"
+            class="wide"
+          ></textarea>
         </div>
       </div>
     `
@@ -73,12 +88,15 @@ class SelectStreamWizard extends Component {
 module.exports = class SubscribeWizard extends Wizard {
   constructor (opts = {}) {
     const s = new SelectStreamWizard(opts.list)
-    super([
-      ['Paste Dazaar card', s],
-      ['View stream', null]
-    ], {
-      title: 'Start subscribing',
-      ...opts
-    })
+    super(
+      [
+        ['Paste Dazaar card', s],
+        ['View stream', null]
+      ],
+      {
+        title: 'Start subscribing',
+        ...opts
+      }
+    )
   }
 }

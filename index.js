@@ -9,14 +9,14 @@ const hypercore = require('hypercore')
 const crypto = require('hypercore-crypto')
 const electron = require('electron')
 const path = require('path')
-const userDataPath = (electron.app || electron.remote.app).getPath('userData');
+const userDataPath = (electron.app || electron.remote.app).getPath('userData')
 const dataPath = path.join(userDataPath, './dazaar-vision-data')
 const dazaar = require('dazaar')(dataPath)
 const Payment = require('dazaar-payment')
 
 console.log('Storing data in', dataPath)
 
-const style = css `
+const style = css`
   :host {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -26,25 +26,30 @@ const style = css `
     margin-bottom: 1.4rem;
   }
 `
-const main = html `
+const main = html`
   <div class="${style} h-100">
-    <svg 
+    <svg
       id="circus"
       style="transform: translateX(-50%);"
       class="top-0 left-0 fade-in a-ease-in-out a-fill-both a-duration-short z0 w-vm-60 h-100 highlight t-duration-mid tt"
-      viewBox="0 0 400 400">
+      viewBox="0 0 400 400"
+    >
       <g class="t-ease t-duration-short" style="transition-property: color;">
         <g class="t-ease t-duration-mid tt t-origin-center t-delay-short">
           <use
             href="#shape"
             class="o-0 ripple a-linear a-delay-long a-duration-yawn infinite t-origin-center a-fill-both"
-            style="--pulse-from: .33; --pulse-to: 1; --opaque: .3; --fill: url('#ripple-gradient')"/>
+            style="--pulse-from: .33; --pulse-to: 1; --opaque: .3; --fill: url('#ripple-gradient')"
+          />
         </g>
-        <g class="t-ease tt t-origin-center t-delay-micro t-duration-mid fade-out">
+        <g
+          class="t-ease tt t-origin-center t-delay-micro t-duration-mid fade-out"
+        >
           <use
             href="#shape"
             class="o-0 to ripple a-linear a-duration-yawn infinite t-origin-center a-fill-both"
-            style="--pulse-from: .33; --pulse-to: 1; --opaque: .3;  --fill: url('#ripple-gradient')" />
+            style="--pulse-from: .33; --pulse-to: 1; --opaque: .3;  --fill: url('#ripple-gradient')"
+          />
         </g>
         <g class="t-ease tt t-origin-center t-duration-mid">
           <use
@@ -53,28 +58,32 @@ const main = html `
             class="to pulsate a-ease-in-out a-alternate t-duration-short a-duration-long infinite t-origin-center"
             style="--pulse-from: .33; --pulse-to: .35; --fill: url('#iris-gradient');"
             stroke-width="4"
-            stroke="hsla(var(--hue,var(--accentH)),var(--accentS),var(--lightness,var(--spotlight)),.1)" />
+            stroke="hsla(var(--hue,var(--accentH)),var(--accentS),var(--lightness,var(--spotlight)),.1)"
+          />
         </g>
       </g>
     </svg>
     <div class="df columns align-start justify-center p4 relative">
-      <h1 class="f-180 normal">Welcome to <span class="highlight">Dazaar</span> Vision</h1>
+      <h1 class="f-180 normal">
+        Welcome to <span class="highlight">Dazaar</span> Vision
+      </h1>
       <p class="f-120">Choose how you want to use Dazaar.</p>
       <div class="buttons pv3">
         ${new Button('Start broadcast', { onclick: broadcast }).element}
         ${new Button('Subscribe to stream', { onclick: subscribe }).element}
       </div>
-        <svg
-          class="absolute right-0 bottom-0 m4"
-          style="height: 2rem;"
-          title="Dazaar"
-          viewBox="0 0 160 32"
-          onclick="document.querySelector(this.dataset.href).scrollIntoView({ behavior: 'smooth' })">
-          <use 
-            href="#logo-letters"  
-            fill="hsla(var(--hue), var(--accentS),var(--accentL),1)"
-            />
-        </svg>
+      <svg
+        class="absolute right-0 bottom-0 m4"
+        style="height: 2rem;"
+        title="Dazaar"
+        viewBox="0 0 160 32"
+        onclick="document.querySelector(this.dataset.href).scrollIntoView({ behavior: 'smooth' })"
+      >
+        <use
+          href="#logo-letters"
+          fill="hsla(var(--hue), var(--accentS),var(--accentL),1)"
+        />
+      </svg>
     </div>
   </div>
 `
@@ -85,126 +94,133 @@ document.body.appendChild(main)
 // Export mute functions
 window.mute = mute
 
-function subscribe() {
-    const sw = new SubscribeWizard({
-        list(cb) {
-            dazaar.buying(function(err, keys) {
-                if (err) return cb(err)
-                loadInfo(keys, true, cb)
-            })
-        },
-        ondone() {
-            const card = sw.value[0]
-            const buyer = dazaar.buy(Buffer.from(card.id, 'hex'), { sparse: true })
-            const s = new Subscription({
-                buyer,
-                payment: card.payment,
-                onstop() {
-                    changeMainView(main)
-                }
-            })
-
-            changeMainView(s.element)
-        },
-        oncancel() {
-            changeMainView(main)
+function subscribe () {
+  const sw = new SubscribeWizard({
+    list (cb) {
+      dazaar.buying(function (err, keys) {
+        if (err) return cb(err)
+        loadInfo(keys, true, cb)
+      })
+    },
+    ondone () {
+      const card = sw.value[0]
+      const buyer = dazaar.buy(Buffer.from(card.id, 'hex'), { sparse: true })
+      const s = new Subscription({
+        buyer,
+        payment: card.payment,
+        onstop () {
+          changeMainView(main)
         }
-    })
+      })
 
-    changeMainView(sw.element)
-}
-
-function broadcast() {
-    const bw = new BroadcastWizard({
-        list(cb) {
-            dazaar.selling(function(err, keys) {
-                if (err) return cb(err)
-                loadInfo(keys, false, cb)
-            })
-        },
-        ondone() {
-            let [existing, payment, devices] = bw.value
-            const feed = createFeed(existing && existing.feed)
-            let pay = null
-            const seller = dazaar.sell(feed, {
-                validate(remoteKey, done) {
-                    console.log('validate', remoteKey, payment)
-                    if (!payment) return done(null, { type: 'free' })
-                    pay.validate(remoteKey, function(err, info) {
-                        console.log('done', err, info)
-                        done(err, info)
-                    })
-                }
-            })
-            seller.ready(function() {
-                if (payment && !Array.isArray(payment)) payment = [payment]
-                pay = new Payment(seller.key, payment)
-            })
-            const b = new Broadcast({
-                payment,
-                video: devices.video,
-                audio: devices.audio,
-                quality: devices.quality,
-                description: devices.description,
-                seller,
-                onstop() {
-                    if (pay) pay.destroy()
-                    changeMainView(main)
-                }
-            })
-
-            changeMainView(b.element)
-        },
-        oncancel() {
-            changeMainView(main)
-        }
-    })
-
-    changeMainView(bw.element)
-}
-
-function mute() {
-    const v = document.querySelector('video')
-    if (v) v.muted = true
-}
-
-function changeMainView(el) {
-    // TODO: raf me
-    view.replaceWith(el)
-    view = el
-}
-
-function createFeed(publicKey, buyer) {
-    const keys = !publicKey ? crypto.keyPair() : null
-    if (keys) publicKey = keys.publicKey
-
-    // TODO: make the storage function a public api that's always namespaced
-    return hypercore(name => dazaar._storage((buyer ? 'buys/' : 'streams/') + publicKey.toString('hex') + '/' + name), publicKey, {
-        secretKey: keys && keys.secretKey
-    })
-}
-
-function loadInfo(keys, buyer, cb) {
-    let i = 0
-    const result = []
-    loop()
-
-    function loop() {
-        if (i >= keys.length) return cb(null, result)
-        const k = keys[i++]
-        const feed = createFeed(k.feed, buyer)
-
-        feed.get(0, { wait: false }, function(err, data) {
-            if (err) return loop()
-            try {
-                data = JSON.parse(data)
-                result.push({
-                    key: k.key,
-                    feed: k.feed,
-                    ...data
-                })
-            } catch (_) {}
-            feed.close(loop)
-        })
+      changeMainView(s.element)
+    },
+    oncancel () {
+      changeMainView(main)
     }
+  })
+
+  changeMainView(sw.element)
+}
+
+function broadcast () {
+  const bw = new BroadcastWizard({
+    list (cb) {
+      dazaar.selling(function (err, keys) {
+        if (err) return cb(err)
+        loadInfo(keys, false, cb)
+      })
+    },
+    ondone () {
+      let [existing, payment, devices] = bw.value
+      const feed = createFeed(existing && existing.feed)
+      let pay = null
+      const seller = dazaar.sell(feed, {
+        validate (remoteKey, done) {
+          console.log('validate', remoteKey, payment)
+          if (!payment) return done(null, { type: 'free' })
+          pay.validate(remoteKey, function (err, info) {
+            console.log('done', err, info)
+            done(err, info)
+          })
+        }
+      })
+      seller.ready(function () {
+        if (payment && !Array.isArray(payment)) payment = [payment]
+        pay = new Payment(seller.key, payment)
+      })
+      const b = new Broadcast({
+        payment,
+        video: devices.video,
+        audio: devices.audio,
+        quality: devices.quality,
+        description: devices.description,
+        seller,
+        onstop () {
+          if (pay) pay.destroy()
+          changeMainView(main)
+        }
+      })
+
+      changeMainView(b.element)
+    },
+    oncancel () {
+      changeMainView(main)
+    }
+  })
+
+  changeMainView(bw.element)
+}
+
+function mute () {
+  const v = document.querySelector('video')
+  if (v) v.muted = true
+}
+
+function changeMainView (el) {
+  // TODO: raf me
+  view.replaceWith(el)
+  view = el
+}
+
+function createFeed (publicKey, buyer) {
+  const keys = !publicKey ? crypto.keyPair() : null
+  if (keys) publicKey = keys.publicKey
+
+  // TODO: make the storage function a public api that's always namespaced
+  return hypercore(
+    name =>
+      dazaar._storage(
+        (buyer ? 'buys/' : 'streams/') + publicKey.toString('hex') + '/' + name
+      ),
+    publicKey,
+    {
+      secretKey: keys && keys.secretKey
+    }
+  )
+}
+
+function loadInfo (keys, buyer, cb) {
+  let i = 0
+  const result = []
+  loop()
+
+  function loop () {
+    if (i >= keys.length) return cb(null, result)
+    const k = keys[i++]
+    const feed = createFeed(k.feed, buyer)
+
+    feed.get(0, { wait: false }, function (err, data) {
+      if (err) return loop()
+      try {
+        data = JSON.parse(data)
+        result.push({
+          key: k.key,
+          feed: k.feed,
+          ...data
+        })
+      } catch (_) {}
+      feed.close(loop)
+    })
+  }
 }

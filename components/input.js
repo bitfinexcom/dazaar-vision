@@ -2,10 +2,10 @@ const Component = require('hui')
 const html = require('hui/html')
 const css = require('hui/css')
 
-const style = css `
+const style = css`
   :host {
     color: #353248;
-    padding: .8rem;
+    padding: 0.8rem;
     font-size: 100%;
     letter-spacing: 0.02em;
     outline: none;
@@ -14,31 +14,37 @@ const style = css `
   }
 
   :host.error {
-    border: 0.5px solid #E83D4A;
+    border: 0.5px solid #e83d4a;
   }
 `
 
 module.exports = class Input extends Component {
-    constructor(opts) {
-        super()
-        this.options = opts || {}
-    }
+  constructor (opts) {
+    super()
+    this.options = opts || {}
+  }
 
-    set error(val) {
-        if (val) this.element.classList.add('error')
-        else this.element.classList.remove('error')
-    }
+  set error (val) {
+    if (val) this.element.classList.add('error')
+    else this.element.classList.remove('error')
+  }
 
-    set value(val) {
-        this.element.value = val
-    }
+  set value (val) {
+    this.element.value = val
+  }
 
-    get value() {
-        return this.element.value
-    }
+  get value () {
+    return this.element.value
+  }
 
-    createElement() {
-        if (!this.options.disabled && this.options.disabled !== undefined) delete this.options.disabled
-        return html `<input class="${style + ' ' + (this.options.class || '')}" ${this.options}>`
-    }
+  createElement () {
+    if (!this.options.disabled && this.options.disabled !== undefined)
+      delete this.options.disabled
+    return html`
+      <input
+        class="${style + ' ' + (this.options.class || '')}"
+        ${this.options}
+      />
+    `
+  }
 }

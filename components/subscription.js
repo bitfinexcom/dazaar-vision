@@ -11,15 +11,15 @@ const prettyMilliseconds = require('pretty-ms')
 let ID = 0
 const REPLY = new Map()
 
-ipcRenderer.on('scatter-reply', function(event, data) {
-    const id = data.id
-    const cb = REPLY.get(id)
-    REPLY.delete(id)
-    const error = data.error ? new Error(data.error) : null
-    if (cb) cb(error)
+ipcRenderer.on('scatter-reply', function (event, data) {
+  const id = data.id
+  const cb = REPLY.get(id)
+  REPLY.delete(id)
+  const error = data.error ? new Error(data.error) : null
+  if (cb) cb(error)
 })
 
-const style = css `
+const style = css`
   :host {
     position: relative;
   }
@@ -125,172 +125,172 @@ const style = css `
 `
 
 module.exports = class Subscription extends Component {
-    constructor(opts) {
-        super()
-        this.options = opts
-        this.buyer = this.options.buyer
-        this.onstop = this.options.onstop || noop
-        this._desc = html `<span>Waiting for description</span>`
-        this._info = html `<span>Waiting for remote info</span>`
-        this._downloaded = html `<span>0 B</span>`
-        this._peers = html `<span>0</span>`
-        this._server = null
-        this._gotoEnd = true
-        this.currentFrame = 0
-        this._serverStream = null
-        this._amount = null
-        this._timeout = null
-        this.downloadBytes = 0
-        this._payInfo = html `<span></span>`
-        this._payInfoHide = null
-        this.swarm = null
-        this._subscribe()
-    }
+  constructor(opts) {
+    super()
+    this.options = opts
+    this.buyer = this.options.buyer
+    this.onstop = this.options.onstop || noop
+    this._desc = html`<span>Waiting for description</span>`
+    this._info = html`<span>Waiting for remote info</span>`
+    this._downloaded = html`<span>0 B</span>`
+    this._peers = html`<span>0</span>`
+    this._server = null
+    this._gotoEnd = true
+    this.currentFrame = 0
+    this._serverStream = null
+    this._amount = null
+    this._timeout = null
+    this.downloadBytes = 0
+    this._payInfo = html`<span></span>`
+    this._payInfoHide = null
+    this.swarm = null
+    this._subscribe()
+  }
 
-    _subscribe() {
-        const self = this
+  _subscribe() {
+    const self = this
 
-        if (this.buyer.feed) onfeed(this.buyer.feed)
-        else this.buyer.on('feed', () => onfeed(this.buyer.feed))
+    if (this.buyer.feed) onfeed(this.buyer.feed)
+    else this.buyer.on('feed', () => onfeed(this.buyer.feed))
 
-        this.buyer.ready(() => {
-            this.swarm = require('dazaar/swarm')(this.buyer)
-            this.swarm.on('connection', () => {
-                this.update()
-            })
-            this.swarm.on('disconnection', () => {
-                this.update()
-            })
-        })
+    this.buyer.ready(() => {
+      this.swarm = require('dazaar/swarm')(this.buyer)
+      this.swarm.on('connection', () => {
+        this.update()
+      })
+      this.swarm.on('disconnection', () => {
+        this.update()
+      })
+    })
 
-        let hoverState = false
+    let hoverState = false
 
-        this.buyer.on('invalid', (err) => {
-            this._info.innerText = err.message
-            this.element.classList.add('active')
-            hoverState = true
-            clearTimeout(this._timeout)
-        })
+    this.buyer.on('invalid', (err) => {
+      this._info.innerText = err.message
+      this.element.classList.add('active')
+      hoverState = true
+      clearTimeout(this._timeout)
+    })
 
-        this.buyer.on('valid', (info) => {
-            this._info.innerText = infoMessage(info)
-            if (!hoverState) return
-            this._timeout = setTimeout(() => this.element.classList.remove('active'))
-        })
+    this.buyer.on('valid', (info) => {
+      this._info.innerText = infoMessage(info)
+      if (!hoverState) return
+      this._timeout = setTimeout(() => this.element.classList.remove('active'))
+    })
 
-        function onfeed(feed) {
-            feed.get(0, (_, data) => {
-                if (data) {
-                    try {
-                        const info = JSON.parse(data)
-                            // TODO: raf me
-                        if (info.description) self._desc.innerText = info.description
-                    } catch (_) {}
-                }
-            })
-
-            feed.on('download', function(index, data) {
-                self.downloadBytes += data.length
-                self.update()
-            })
-
-            if (self._server) return
-            self._server = require('http').createServer(self._onrequest.bind(self))
-            self._server.listen(0, '127.0.0.1')
-            self.once(self._server, 'listening', self.start.bind(self))
+    function onfeed(feed) {
+      feed.get(0, (_, data) => {
+        if (data) {
+          try {
+            const info = JSON.parse(data)
+            // TODO: raf me
+            if (info.description) self._desc.innerText = info.description
+          } catch (_) { }
         }
+      })
+
+      feed.on('download', function (index, data) {
+        self.downloadBytes += data.length
+        self.update()
+      })
+
+      if (self._server) return
+      self._server = require('http').createServer(self._onrequest.bind(self))
+      self._server.listen(0, '127.0.0.1')
+      self.once(self._server, 'listening', self.start.bind(self))
     }
+  }
 
-    render() {
-        this._downloaded.innerText = prettierBytes(this.downloadBytes)
-        this._peers.innerText = this.swarm ? this.swarm.connections.size : 0
-    }
+  render() {
+    this._downloaded.innerText = prettierBytes(this.downloadBytes)
+    this._peers.innerText = this.swarm ? this.swarm.connections.size : 0
+  }
 
-    _onrequest(req, res) {
-        const feed = this.buyer.feed
-        feed.get(1, (err, data) => {
-            if (err || !this.loaded) return res.destroy()
-            res.write(data)
+  _onrequest(req, res) {
+    const feed = this.buyer.feed
+    feed.get(1, (err, data) => {
+      if (err || !this.loaded) return res.destroy()
+      res.write(data)
 
-            feed.update({ ifAvailable: true }, () => {
-                if (!this.loaded) return res.destroy()
+      feed.update({ ifAvailable: true }, () => {
+        if (!this.loaded) return res.destroy()
 
-                let start = Math.max(2, feed.length - 1)
-                if (!this._gotoEnd) start = 2
+        let start = Math.max(2, feed.length - 1)
+        if (!this._gotoEnd) start = 2
 
-                const stream = feed.createReadStream({
-                    start,
-                    live: true
-                })
-
-                this.currentFrame = start
-                this._serverStream = stream
-
-                stream.on('data', () => {
-                    if (stream === this._serverStream) {
-                        this.currentFrame = start++
-                            this.update()
-                    }
-                })
-
-                pump(stream, res)
-            })
+        const stream = feed.createReadStream({
+          start,
+          live: true
         })
-    }
 
-    start() {
-        const video = this.element.querySelector('video')
-        video.src = 'http://127.0.0.1:' + this._server.address().port
-        video.play()
-    }
+        this.currentFrame = start
+        this._serverStream = stream
 
-    stop() {
-        if (this.buyer.feed) this.buyer.feed.close()
-        if (this.swarm) this.swarm.destroy()
-        if (this._server) this._server.close()
-        const video = this.element.querySelector('video')
-        video.src = ''
-        this.onstop()
-    }
-
-    gotoStart() {
-        this._gotoEnd = false
-        if (this._serverStream) this._serverStream.destroy()
-        if (this._server) this.start()
-    }
-
-    gotoEnd() {
-        this._gotoEnd = true
-        if (this._serverStream) this._serverStream.destroy()
-        if (this._server) this.start()
-    }
-
-    buy(amount) {
-        const id = ID++
-
-            ipcRenderer.send('scatter', {
-                id,
-                seller: this.buyer.seller.toString('hex'),
-                buyer: this.buyer.key.toString('hex'),
-                amount,
-                payment: this.options.payment
-            })
-
-        REPLY.set(id, (err) => {
-            this._amount.value = ''
-            if (err) this._payInfo.innerText = err.message
-            else this._payInfo.innerText = 'Payment succeeded! Please wait.'
-
-            clearTimeout(this._payInfoHide)
-            this._payInfoHide = setTimeout(() => {
-                this._payInfo.innerText = ''
-            }, 6000)
+        stream.on('data', () => {
+          if (stream === this._serverStream) {
+            this.currentFrame = start++
+            this.update()
+          }
         })
-    }
 
-    createElement() {
-        const amount = this._amount = new Input({ placeholder: 'Enter amount, ie. 0.1234 EOS' })
-        return html `
+        pump(stream, res)
+      })
+    })
+  }
+
+  start() {
+    const video = this.element.querySelector('video')
+    video.src = 'http://127.0.0.1:' + this._server.address().port
+    video.play()
+  }
+
+  stop() {
+    if (this.buyer.feed) this.buyer.feed.close()
+    if (this.swarm) this.swarm.destroy()
+    if (this._server) this._server.close()
+    const video = this.element.querySelector('video')
+    video.src = ''
+    this.onstop()
+  }
+
+  gotoStart() {
+    this._gotoEnd = false
+    if (this._serverStream) this._serverStream.destroy()
+    if (this._server) this.start()
+  }
+
+  gotoEnd() {
+    this._gotoEnd = true
+    if (this._serverStream) this._serverStream.destroy()
+    if (this._server) this.start()
+  }
+
+  buy(amount) {
+    const id = ID++
+
+    ipcRenderer.send('scatter', {
+      id,
+      seller: this.buyer.seller.toString('hex'),
+      buyer: this.buyer.key.toString('hex'),
+      amount,
+      payment: this.options.payment
+    })
+
+    REPLY.set(id, (err) => {
+      this._amount.value = ''
+      if (err) this._payInfo.innerText = err.message
+      else this._payInfo.innerText = 'Payment succeeded! Please wait.'
+
+      clearTimeout(this._payInfoHide)
+      this._payInfoHide = setTimeout(() => {
+        this._payInfo.innerText = ''
+      }, 6000)
+    })
+  }
+
+  createElement() {
+    const amount = this._amount = new Input({ placeholder: 'Enter amount, ie. 0.1234 EOS' })
+    return html`
       <div class="${style}">
         <video></video>
         <div class="overlay">
@@ -318,21 +318,21 @@ module.exports = class Subscription extends Component {
         </div>
       </div>
     `
-    }
+  }
 }
 
-function noop() {}
+function noop() { }
 
 function infoMessage(info) {
-    if (info) {
-        if (info.type === 'free') {
-            return 'Stream is free of charge'
-        } else if (info.type === 'time') {
-            return 'Subscription expires in ' + prettyMilliseconds(info.remaining, { compact: true })
-        } else {
-            return 'Unknown subscription type: ' + info.type
-        }
+  if (info) {
+    if (info.type === 'free') {
+      return 'Stream is free of charge'
+    } else if (info.type === 'time') {
+      return 'Subscription expires in ' + prettyMilliseconds(info.remaining, { compact: true })
     } else {
-        return 'Remote did not share any subscription info'
+      return 'Unknown subscription type: ' + info.type
     }
+  } else {
+    return 'Remote did not share any subscription info'
+  }
 }

@@ -5,7 +5,7 @@ const Select = require('./select')
 const Button = require('./button')
 const Input = require('./input')
 
-const style = css `
+const style = css`
   :host {
     display: grid;
     position: relative;
@@ -102,90 +102,90 @@ const style = css `
 `
 
 module.exports = class Wizard extends Component {
-    constructor(views, opts) {
-        super()
+  constructor(views, opts) {
+    super()
 
-        this.views = views
-        this._headline = opts && opts.title || ''
-        this._selected = 0
-        this.selected = 0
-        this._bullets = null
-        this._view = null
-        this._end = this.views.length
-        this.oncancel = opts && opts.oncancel || noop
-        this.ondone = opts && opts.ondone || noop
+    this.views = views
+    this._headline = opts && opts.title || ''
+    this._selected = 0
+    this.selected = 0
+    this._bullets = null
+    this._view = null
+    this._end = this.views.length
+    this.oncancel = opts && opts.oncancel || noop
+    this.ondone = opts && opts.ondone || noop
 
-        if (this.views[this._end - 1][1] === null) {
-            this._end--
-        }
+    if (this.views[this._end - 1][1] === null) {
+      this._end--
+    }
+  }
+
+  get value() {
+    const data = new Array(this._end)
+    for (let i = 0; i < data.length; i++) {
+      data[i] = this.views[i][1].value
+    }
+    return data
+  }
+
+  select(i) {
+    if (i < 0) {
+      this.oncancel()
+    } else if (i >= this._end) {
+      this.ondone()
+    } else {
+      this.selected = i
+      this.update()
+    }
+  }
+
+  render() {
+    if (this._selected === this.selected) return
+
+    for (let i = 0; i <= this.selected; i++) {
+      this._bullets[i].classList.add('selected')
     }
 
-    get value() {
-        const data = new Array(this._end)
-        for (let i = 0; i < data.length; i++) {
-            data[i] = this.views[i][1].value
-        }
-        return data
+    for (let i = this.selected + 1; i < this._bullets.length; i++) {
+      this._bullets[i].classList.remove('selected')
     }
 
-    select(i) {
-        if (i < 0) {
-            this.oncancel()
-        } else if (i >= this._end) {
-            this.ondone()
-        } else {
-            this.selected = i
-            this.update()
-        }
+    this._selected = this.selected
+    this._view.replaceWith(this.views[this.selected][1].element)
+    this._view = this.views[this.selected][1].element
+
+    if (this._selected + 1 === this._end) {
+      this._nextBtn.innerText = this._headline
+    } else {
+      this._nextBtn.innerText = 'Next'
     }
+  }
 
-    render() {
-        if (this._selected === this.selected) return
+  back() {
+    this.select(this.selected - 1)
+  }
 
-        for (let i = 0; i <= this.selected; i++) {
-            this._bullets[i].classList.add('selected')
-        }
-
-        for (let i = this.selected + 1; i < this._bullets.length; i++) {
-            this._bullets[i].classList.remove('selected')
-        }
-
-        this._selected = this.selected
-        this._view.replaceWith(this.views[this.selected][1].element)
-        this._view = this.views[this.selected][1].element
-
-        if (this._selected + 1 === this._end) {
-            this._nextBtn.innerText = this._headline
-        } else {
-            this._nextBtn.innerText = 'Next'
-        }
+  next() {
+    if (this.views[this.selected][1].validate()) {
+      this.select(this.selected + 1)
     }
+  }
 
-    back() {
-        this.select(this.selected - 1)
-    }
-
-    next() {
-        if (this.views[this.selected][1].validate()) {
-            this.select(this.selected + 1)
-        }
-    }
-
-    createElement() {
-        const bullets = this._bullets = this.views.map(([name], i) => {
-            return html `
+  createElement() {
+    const bullets = this._bullets = this.views.map(([name], i) => {
+      return html`
         <div class="bullet">
           <div class="dot">${i + 1}</div>
           <span class="text">${name}</span>
         </div>
       `
-        })
+    })
 
-        bullets[this.selected].classList.add('selected')
-        this._view = this.views[this.selected][1].element
-        this._nextBtn = new Button(this.selected + 1 === this._end ? this._headline : 'Next', { class: 'next-btn', onclick: this.next.bind(this) }).element
+    bullets[this.selected].classList.add('selected')
+    this._view = this.views[this.selected][1].element
+    this._nextBtn = new Button(this.selected + 1 === this._end ? this._headline : 'Next', { class: 'next-btn', onclick: this.next.bind(this) }).element
 
-        return html `
+    return html`
       <div class=${style}>
         <div class="p4 left">
           <div class="df align-center mb4">
@@ -225,7 +225,7 @@ module.exports = class Wizard extends Component {
         </main>
       </div>
     `
-    }
+  }
 }
 
-function noop() {}
+function noop() { }
