@@ -74,11 +74,13 @@ class SelectStreamWizard extends Component {
       <div>
         <div class="configs">
           ${this.select.element}
-          <textarea
-            autofocus
-            style="outline: none; border: 0.5px solid rgba(53, 50, 72, 0.5); display: block; border-radius: 4px; height: 200px;"
-            class="wide"
-          ></textarea>
+          <div>
+            <textarea
+              autofocus
+              style="outline: none; border: 0.5px solid rgba(53, 50, 72, 0.5); display: block; border-radius: 4px; height: 200px;"
+              class="wide"
+            ></textarea>
+          </div>
         </div>
       </div>
     `

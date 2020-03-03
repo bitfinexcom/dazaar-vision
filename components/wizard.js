@@ -85,6 +85,7 @@ const style = css`
   :host .configs {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(20ch, 1fr));
+    align-items: flex-start;
     grid-gap: 1rem;
     margin-bottom: 1rem;
   }
