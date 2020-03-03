@@ -86,6 +86,7 @@ const style = css `
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(20ch, 1fr));
     grid-gap: 1rem;
+    margin-bottom: 1rem;
   }
   :host .back-arrow:before {
     content: ' ';
@@ -96,6 +97,7 @@ const style = css `
     border-width: .2rem 0 0 .2rem;
     border-style: solid;
     margin-right: .5rem;
+    margin-bottom: .15rem;
   }
 `
 

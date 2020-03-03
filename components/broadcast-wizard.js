@@ -267,18 +267,10 @@ class QualityWizard extends Component {
       <div>
         <h4>Stream Options</h4>
         <div class="configs">
-          <div class="row">
-            ${this._quality.element}
-          </div>
-          <div class="row">
-            ${this._video.element}
-          </div>
-          <div class="row">
-            ${this._audio.element}
-          </div>
-          <div class="row">
-            ${this._description.element}
-          </div>
+          ${this._quality.element}
+          ${this._video.element}
+          ${this._audio.element}
+          ${this._description.element}
         </div>
       </div>
     `
