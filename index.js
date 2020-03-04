@@ -87,7 +87,17 @@ const main = html`
     </div>
   </div>
 `
-
+let cycleColor = true
+function bumpColor () {
+  if (cycleColor) {
+    const hue = Number(document.body.style.getPropertyValue('--hue')) || 0
+    document.body.style.setProperty('--hue', hue + 1 % 360)
+    setTimeout(() => window.requestAnimationFrame(bumpColor), 100)
+  } else {
+    document.body.style.removeProperty('--hue')
+  }
+}
+window.requestAnimationFrame(bumpColor)
 let view = main
 document.body.appendChild(main)
 
@@ -95,6 +105,7 @@ document.body.appendChild(main)
 window.mute = mute
 
 function subscribe () {
+  cycleColor = false
   const sw = new SubscribeWizard({
     list (cb) {
       dazaar.buying(function (err, keys) {
@@ -124,6 +135,7 @@ function subscribe () {
 }
 
 function broadcast () {
+  cycleColor = false
   const bw = new BroadcastWizard({
     list (cb) {
       dazaar.selling(function (err, keys) {
