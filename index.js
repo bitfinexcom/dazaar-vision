@@ -91,7 +91,7 @@ let cycleColor = true
 function bumpColor () {
   if (cycleColor) {
     const hue = Number(document.body.style.getPropertyValue('--hue')) || 0
-    document.body.style.setProperty('--hue', hue + 1 % 360)
+    document.body.style.setProperty('--hue', (hue + 1) % 360)
     setTimeout(() => window.requestAnimationFrame(bumpColor), 100)
   } else {
     document.body.style.removeProperty('--hue')
