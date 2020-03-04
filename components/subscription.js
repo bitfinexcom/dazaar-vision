@@ -38,11 +38,9 @@ const style = css`
     text-align: center;
     width: 100%;
     font-size: 35px;
-    line-height: 70px;
     text-align: center;
     letter-spacing: 0.02em;
     user-select: none;
-    margin-bottom: 30px;
   }
 
   :host .overlay {
@@ -310,7 +308,7 @@ module.exports = class Subscription extends Component {
             ${new Button('Stop watching', { onclick: this.stop.bind(this) })
               .element}
           </div>
-          <div class="bottom df justify-between">
+          <div class="bottom df justify-between align-center">
             ${new Button('Go to start', {
               border: true,
               onclick: this.gotoStart.bind(this)
