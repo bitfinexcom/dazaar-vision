@@ -125,15 +125,23 @@ const style = css`
 `
 
 module.exports = class Subscription extends Component {
-  constructor(opts) {
+  constructor (opts) {
     super()
     this.options = opts
     this.buyer = this.options.buyer
     this.onstop = this.options.onstop || noop
-    this._desc = html`<span>Waiting for description</span>`
-    this._info = html`<span>Waiting for remote info</span>`
-    this._downloaded = html`<span>0 B</span>`
-    this._peers = html`<span>0</span>`
+    this._desc = html`
+      <span>Waiting for description</span>
+    `
+    this._info = html`
+      <span>Waiting for remote info</span>
+    `
+    this._downloaded = html`
+      <span>0 B</span>
+    `
+    this._peers = html`
+      <span>0</span>
+    `
     this._server = null
     this._gotoEnd = true
     this.currentFrame = 0
@@ -141,13 +149,15 @@ module.exports = class Subscription extends Component {
     this._amount = null
     this._timeout = null
     this.downloadBytes = 0
-    this._payInfo = html`<span></span>`
+    this._payInfo = html`
+      <span></span>
+    `
     this._payInfoHide = null
     this.swarm = null
     this._subscribe()
   }
 
-  _subscribe() {
+  _subscribe () {
     const self = this
 
     if (this.buyer.feed) onfeed(this.buyer.feed)
@@ -165,27 +175,27 @@ module.exports = class Subscription extends Component {
 
     let hoverState = false
 
-    this.buyer.on('invalid', (err) => {
+    this.buyer.on('invalid', err => {
       this._info.innerText = err.message
       this.element.classList.add('active')
       hoverState = true
       clearTimeout(this._timeout)
     })
 
-    this.buyer.on('valid', (info) => {
+    this.buyer.on('valid', info => {
       this._info.innerText = infoMessage(info)
       if (!hoverState) return
       this._timeout = setTimeout(() => this.element.classList.remove('active'))
     })
 
-    function onfeed(feed) {
+    function onfeed (feed) {
       feed.get(0, (_, data) => {
         if (data) {
           try {
             const info = JSON.parse(data)
             // TODO: raf me
             if (info.description) self._desc.innerText = info.description
-          } catch (_) { }
+          } catch (_) {}
         }
       })
 
@@ -201,12 +211,12 @@ module.exports = class Subscription extends Component {
     }
   }
 
-  render() {
+  render () {
     this._downloaded.innerText = prettierBytes(this.downloadBytes)
     this._peers.innerText = this.swarm ? this.swarm.connections.size : 0
   }
 
-  _onrequest(req, res) {
+  _onrequest (req, res) {
     const feed = this.buyer.feed
     feed.get(1, (err, data) => {
       if (err || !this.loaded) return res.destroy()
@@ -238,13 +248,13 @@ module.exports = class Subscription extends Component {
     })
   }
 
-  start() {
+  start () {
     const video = this.element.querySelector('video')
     video.src = 'http://127.0.0.1:' + this._server.address().port
     video.play()
   }
 
-  stop() {
+  stop () {
     if (this.buyer.feed) this.buyer.feed.close()
     if (this.swarm) this.swarm.destroy()
     if (this._server) this._server.close()
@@ -253,19 +263,19 @@ module.exports = class Subscription extends Component {
     this.onstop()
   }
 
-  gotoStart() {
+  gotoStart () {
     this._gotoEnd = false
     if (this._serverStream) this._serverStream.destroy()
     if (this._server) this.start()
   }
 
-  gotoEnd() {
+  gotoEnd () {
     this._gotoEnd = true
     if (this._serverStream) this._serverStream.destroy()
     if (this._server) this.start()
   }
 
-  buy(amount) {
+  buy (amount) {
     const id = ID++
 
     ipcRenderer.send('scatter', {
@@ -276,7 +286,7 @@ module.exports = class Subscription extends Component {
       payment: this.options.payment
     })
 
-    REPLY.set(id, (err) => {
+    REPLY.set(id, err => {
       this._amount.value = ''
       if (err) this._payInfo.innerText = err.message
       else this._payInfo.innerText = 'Payment succeeded! Please wait.'
@@ -288,22 +298,31 @@ module.exports = class Subscription extends Component {
     })
   }
 
-  createElement() {
-    const amount = this._amount = new Input({ placeholder: 'Enter amount, ie. 0.1234 EOS' })
+  createElement () {
+    const amount = (this._amount = new Input({
+      placeholder: 'Enter amount, ie. 0.1234 EOS'
+    }))
     return html`
       <div class="${style}">
         <video></video>
         <div class="overlay">
           <div class="top-right">
-            ${new Button('Stop watching', { onclick: this.stop.bind(this) }).element}
+            ${new Button('Stop watching', { onclick: this.stop.bind(this) })
+              .element}
           </div>
           <div class="bottom df justify-between">
-            ${new Button('Go to start', { border: true, onclick: this.gotoStart.bind(this) }).element}
+            ${new Button('Go to start', {
+              border: true,
+              onclick: this.gotoStart.bind(this)
+            }).element}
             <div class="flex" style="text-align: center;">
               <h1>${this._info}</h1>
               <h3 style="color: white;">${this._payInfo}</h3>
             </div>
-            ${new Button('Go to end', { border: true, onclick: this.gotoEnd.bind(this) }).element}
+            ${new Button('Go to end', {
+              border: true,
+              onclick: this.gotoEnd.bind(this)
+            }).element}
           </div>
           <div class="info top-left">
             <h3>${this._desc}</h3>
@@ -312,7 +331,10 @@ module.exports = class Subscription extends Component {
               <li>Downloaded ${this._downloaded}</li>
             </ul>
             <div style="${this.options.payment ? '' : 'display: none;'}">
-              ${amount.element} ${new Button('Buy using Scatter App', { onclick: () => this.buy(amount.value) }).element}
+              ${amount.element}
+              ${new Button('Buy using Scatter App', {
+                onclick: () => this.buy(amount.value)
+              }).element}
             </div>
           </div>
         </div>
@@ -321,14 +343,17 @@ module.exports = class Subscription extends Component {
   }
 }
 
-function noop() { }
+function noop () {}
 
-function infoMessage(info) {
+function infoMessage (info) {
   if (info) {
     if (info.type === 'free') {
       return 'Stream is free of charge'
     } else if (info.type === 'time') {
-      return 'Subscription expires in ' + prettyMilliseconds(info.remaining, { compact: true })
+      return (
+        'Subscription expires in ' +
+        prettyMilliseconds(info.remaining, { compact: true })
+      )
     } else {
       return 'Unknown subscription type: ' + info.type
     }

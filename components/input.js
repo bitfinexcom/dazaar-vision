@@ -5,7 +5,6 @@ const css = require('hui/css')
 const style = css`
   :host {
     color: #353248;
-    padding: 0.8rem;
     font-size: 100%;
     letter-spacing: 0.02em;
     outline: none;
@@ -42,7 +41,7 @@ module.exports = class Input extends Component {
       delete this.options.disabled
     return html`
       <input
-        class="${style + ' ' + (this.options.class || '')}"
+        class="p2 ${style + ' ' + (this.options.class || '')}"
         ${this.options}
       />
     `
