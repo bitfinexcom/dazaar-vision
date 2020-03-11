@@ -13,6 +13,7 @@ class SelectStreamWizard extends Component {
     this.existing = []
     this.select = new Select([['Paste new Dazaar card', null]], {
       class: 'wide',
+      border: true,
       onchange: this.onchange.bind(this)
     })
     if (list) {
@@ -38,6 +39,7 @@ class SelectStreamWizard extends Component {
     }
     const s = new Select(list, {
       class: 'wide',
+      border: true,
       onchange: this.onchange.bind(this)
     })
     this.select.element.replaceWith(s.element)
@@ -77,7 +79,7 @@ class SelectStreamWizard extends Component {
           <div>
             <textarea
               autofocus
-              style="outline: none; border: 0.5px solid rgba(53, 50, 72, 0.5); display: block; border-radius: 4px; height: 200px;"
+              style="outline: none; border: 0.5px solid rgba(53, 50, 72, 0.1); display: block; border-radius: 4px; height: 200px;"
               class="wide"
             ></textarea>
           </div>

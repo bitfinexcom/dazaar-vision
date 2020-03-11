@@ -27,7 +27,7 @@ const style = css`
   :host.border {
     color: #353248;
     background-color: white;
-    border: 0.5px solid rgba(53, 50, 72, 0.5);
+    border: 0.5px solid rgba(53, 50, 72, 0.1);
     background-image: url("data:image/svg+xml,%3Csvg width='18' height='11' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l8 8.66L17 1' stroke='#353248' stroke-miterlimit='10'/%3E%3C/svg%3E");
   }
 

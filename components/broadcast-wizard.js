@@ -11,7 +11,7 @@ class SelectStreamWizard extends Component {
   constructor (list) {
     super()
     this.existing = []
-    this.select = new Select([['Create new stream', null]], { class: 'wide' })
+    this.select = new Select([['Create new stream', null]], { class: 'wide', border: true })
     if (list) {
       list((err, list) => {
         if (err) return
@@ -33,7 +33,7 @@ class SelectStreamWizard extends Component {
         (n ? ')' : '')
       list.push(['Resume ' + n, e])
     }
-    const s = new Select(list, { class: 'wide' })
+    const s = new Select(list, { class: 'wide', border: true })
     this.select.element.replaceWith(s.element)
     this.select = s
   }

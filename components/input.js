@@ -9,7 +9,7 @@ const style = css`
     letter-spacing: 0.02em;
     outline: none;
     border-radius: 4px;
-    border: 0.5px solid rgba(53, 50, 72, 0.5);
+    border: 0.5px solid rgba(53, 50, 72, 0.1);
   }
 
   :host.error {
