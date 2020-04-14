@@ -110,7 +110,7 @@ module.exports = class Broadcast extends Component {
     super()
     this.options = opts || {}
     this.seller = opts.seller
-    this.onstop = this.options.onstop || noop
+    this.onstop = this.options.onstop || (() => {})
     this.timeout = null
     this.recording = null
     this._server = null

@@ -107,12 +107,13 @@ window.mute = mute
 function subscribe () {
   cycleColor = false
   const sw = new SubscribeWizard({
-    list (cb) {
-      dazaar.buying(function (err, keys) {
-        if (err) return cb(err)
-        loadInfo(keys, true, cb)
-      })
-    },
+    dataPath,
+//    list (cb) {
+//      dazaar.buying(function (err, keys) {
+//        if (err) return cb(err)
+//        loadInfo(keys, true, cb)
+//      })
+//    },
     ondone () {
       const card = sw.value[0]
       const buyer = dazaar.buy(Buffer.from(card.id, 'hex'), { sparse: true })

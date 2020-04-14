@@ -25,8 +25,8 @@ const style = css`
   }
 
   :host:disabled {
-    background-color: rgba(125, 124, 137, 1);
-    color: rgba(53, 50, 72, 1);
+    background-color: rgba(237, 160, 173, 1);
+    color: rgba(252, 241, 243, 1);
   }
 
   :host.border {
