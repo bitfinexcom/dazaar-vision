@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="fill: currentColor;" viewBox="0 0 21 21">
+  <path d="M4.71 4.71V10H10V4.7H4.7zm4.53 4.53H5.47V5.47h3.77v3.77z"/>
+  <path d="M7.86 6.86h-1v1h1v-1zM11 4.71V10h5.29V4.7H11zm4.53 4.53h-3.77V5.47h3.77v3.77z"/>
+  <path d="M14.14 6.86h-1v1h1v-1zM4.71 11v5.29H10V11H4.7zm4.53 4.53H5.47v-3.77h3.77v3.77z"/>
+  <path d="M7.86 13.14h-1v1h1v-1zM12.51 11.76V11h-1.5v5.29h1.5v-.76h-.75v-1.5h.75v-.76h-.75v-1.51h.75zM16.29 11h-.76v.76h.76V11zM15.53 12.76v2.77h-.75v.76h1.5v-3.53h-.75zM14.78 11h-1.51v.76h1.5V11zM14.78 13.27v-.76h-1.51v2.27h1.5v-.76h-.75v-.75h.76zM14.02 15.53h-.75v.76h.75v-.76z"/>
+  <path fill="none" stroke="currentColor" d="M.5.5h20v20H.5z"/>
+</svg>
