@@ -11,7 +11,7 @@
     ]
   },
   "build": {
-    "copyright": "© 2019,BitfinexS",
+    "copyright": "© 2019, Bitfinex",
     "artifactName": "${productName}.${ext}",
     "appId": "com.bitfinex.dazaarvision",
     "productName": "Dazaar Vision",
