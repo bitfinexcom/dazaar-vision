@@ -64,13 +64,13 @@ const main = html`
       </g>
     </svg>
     <div class="df columns align-start justify-center p4 relative">
-      <h1 class="f-180 normal">
-        Welcome to <span class="highlight">Dazaar</span> Vision
+      <h1 class="normal" style="font-size: 3.75rem; line-height: 4.375rem; font-weight: 500;">
+        Welcome to <br /><span class="highlight">Dazaar</span> Vision
       </h1>
-      <p class="f-120">Choose how you want to use Dazaar.</p>
+      <p style="font-size: 1.25rem; line-height: 1.375rem">Choose how you want to use Dazaar.</p>
       <div class="buttons pv3">
         ${new Button('Start broadcast', { onclick: broadcast }).element}
-        ${new Button('Subscribe to stream', { onclick: subscribe }).element}
+        ${new Button('Subscribe to stream', { onclick: subscribe, border: true }).element}
       </div>
       <svg
         class="absolute"

@@ -7,11 +7,11 @@ const style = css`
     font-family: Open Sans;
     font-weight: 600;
     font-style: normal;
-    font-size: 90%;
-    padding: 1.2rem 2.5rem;
+    font-size: 1rem;
+    padding: 1rem 2.5rem;
     text-align: center;
     letter-spacing: 0.05em;
-    background-color: #e83d4a;
+    background-color: #EC375B;
     border-radius: 2.5rem;
     border: none;
     color: #ffffff;
@@ -30,18 +30,17 @@ const style = css`
   }
 
   :host.border {
-    border: 2px solid #d34c50;
-    background-color: #353248;
-    color: #d34c50;
+    border: 1px solid #EC375B;
+    color: #EC375B;
+    background: transparent;
   }
 
   :host.border:disabled {
-    background-color: rgba(53, 50, 72, 0.05);
-    color: rgba(125, 124, 137, 1);
+    opacity: 0.5;
   }
 
   :host.border:hover {
-    background-color: rgba(96, 61, 73, 1);
+    background-color: rgba(138, 70, 77, 0.1);
   }
 `
 
