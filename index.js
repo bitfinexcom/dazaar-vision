@@ -73,8 +73,8 @@ const main = html`
         ${new Button('Subscribe to stream', { onclick: subscribe }).element}
       </div>
       <svg
-        class="absolute right-0 bottom-0 m4"
-        style="height: 2rem;"
+        class="absolute"
+        style="height: 1rem; bottom: 60px; right: 70px;"
         title="Dazaar"
         viewBox="0 0 160 32"
         onclick="document.querySelector(this.dataset.href).scrollIntoView({ behavior: 'smooth' })"
