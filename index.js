@@ -13,9 +13,33 @@ const userDataPath = (electron.app || electron.remote.app).getPath('userData')
 const dataPath = path.join(userDataPath, './dazaar-vision-data')
 const dazaar = require('dazaar')(dataPath)
 const Payment = require('dazaar-payment')
+const fs = require('fs')
+
+class Settings {
+  constructor (dataPath) {
+    this.dataPath = path.resolve(dataPath)
+    this.settingsPath = path.join(this.dataPath, 'settings.json')
+    try {
+      this.data = require(this.settingsPath)
+    } catch (_) {
+      this.data = {}
+    }
+  }
+
+  save (cb) {
+    if (!cb) cb = (() => {})
+    const p = this.settingsPath
+    fs.writeFile(p + '.tmp', JSON.stringify(this.data, null, 2), function (err) {
+      if (err) return cb(err)
+      fs.rename(p + '.tmp', p, cb)
+    })
+  }
+}
+
 
 console.log('Storing data in', dataPath)
 
+const settings = new Settings(dataPath)
 const style = css`
   :host {
     display: grid;
@@ -107,7 +131,7 @@ window.mute = mute
 function subscribe () {
   cycleColor = false
   const sw = new SubscribeWizard({
-    dataPath,
+    settings,
 //    list (cb) {
 //      dazaar.buying(function (err, keys) {
 //        if (err) return cb(err)
