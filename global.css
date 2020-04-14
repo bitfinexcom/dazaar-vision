@@ -50,7 +50,7 @@
     --short: .3s;
     --blink: .15s;
     /* font variables */
-    --font-size: calc(1.6vmin + 4pt);
+    --font-size: 16px;
     --font-main: 'Open Sans', sans-serif;
     --font-support: 'Anonymous Pro', monospace;
     /**/
