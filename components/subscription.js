@@ -38,11 +38,9 @@ const style = css`
     text-align: center;
     width: 100%;
     font-size: 35px;
-    line-height: 70px;
     text-align: center;
     letter-spacing: 0.02em;
     user-select: none;
-    margin-bottom: 30px;
   }
 
   :host .overlay {
@@ -61,10 +59,11 @@ const style = css`
     opacity: 1;
   }
 
-  :host .overlay .bottom-right {
+  :host .overlay .bottom {
     position: absolute;
     right: 0;
     bottom: 0;
+    left: 0;
     margin: 10px;
   }
 
@@ -79,13 +78,6 @@ const style = css`
     position: absolute;
     left: 0;
     top: 0;
-    margin: 10px;
-  }
-
-  :host .overlay .bottom-left {
-    position: absolute;
-    left: 0;
-    bottom: 0;
     margin: 10px;
   }
 
@@ -136,10 +128,18 @@ module.exports = class Subscription extends Component {
     this.options = opts
     this.buyer = this.options.buyer
     this.onstop = this.options.onstop || noop
-    this._desc = html`<span>Waiting for description</span>`
-    this._info = html`<span>Waiting for remote info</span>`
-    this._downloaded = html`<span>0 B</span>`
-    this._peers = html`<span>0</span>`
+    this._desc = html`
+      <span>Waiting for description</span>
+    `
+    this._info = html`
+      <span>Waiting for remote info</span>
+    `
+    this._downloaded = html`
+      <span>0 B</span>
+    `
+    this._peers = html`
+      <span>0</span>
+    `
     this._server = null
     this._gotoEnd = true
     this.currentFrame = 0
@@ -147,7 +147,9 @@ module.exports = class Subscription extends Component {
     this._amount = null
     this._timeout = null
     this.downloadBytes = 0
-    this._payInfo = html`<span></span>`
+    this._payInfo = html`
+      <span></span>
+    `
     this._payInfoHide = null
     this.swarm = null
     this._subscribe()
@@ -171,14 +173,14 @@ module.exports = class Subscription extends Component {
 
     let hoverState = false
 
-    this.buyer.on('invalid', (err) => {
+    this.buyer.on('invalid', err => {
       this._info.innerText = err.message
       this.element.classList.add('active')
       hoverState = true
       clearTimeout(this._timeout)
     })
 
-    this.buyer.on('valid', (info) => {
+    this.buyer.on('valid', info => {
       this._info.innerText = infoMessage(info)
       if (!hoverState) return
       this._timeout = setTimeout(() => this.element.classList.remove('active'))
@@ -282,7 +284,7 @@ module.exports = class Subscription extends Component {
       payment: this.options.payment
     })
 
-    REPLY.set(id, (err) => {
+    REPLY.set(id, err => {
       this._amount.value = ''
       if (err) this._payInfo.innerText = err.message
       else this._payInfo.innerText = 'Payment succeeded! Please wait.'
@@ -295,21 +297,30 @@ module.exports = class Subscription extends Component {
   }
 
   createElement () {
-    const amount = this._amount = new Input({ placeholder: 'Enter amount, ie. 0.1234 EOS' })
+    const amount = (this._amount = new Input({
+      placeholder: 'Enter amount, ie. 0.1234 EOS'
+    }))
     return html`
       <div class="${style}">
         <video></video>
         <div class="overlay">
           <div class="top-right">
-            ${new Button('Stop watching', { onclick: this.stop.bind(this) }).element}
+            ${new Button('Stop watching', { onclick: this.stop.bind(this) })
+              .element}
           </div>
-          <div class="bottom-right">
-            ${new Button('Go to start', { border: true, onclick: this.gotoStart.bind(this) }).element}
-            ${new Button('Go to end', { border: true, onclick: this.gotoEnd.bind(this) }).element}
-          </div>
-          <div class="middle" style="text-align: center;">
-            <h1>${this._info}</h1>
-            <h3 style="color: white;">${this._payInfo}</h3>
+          <div class="bottom df justify-between align-center">
+            ${new Button('Go to start', {
+              border: true,
+              onclick: this.gotoStart.bind(this)
+            }).element}
+            <div class="flex" style="text-align: center;">
+              <h1>${this._info}</h1>
+              <h3 style="color: white;">${this._payInfo}</h3>
+            </div>
+            ${new Button('Go to end', {
+              border: true,
+              onclick: this.gotoEnd.bind(this)
+            }).element}
           </div>
           <div class="info top-left">
             <h3>${this._desc}</h3>
@@ -317,9 +328,12 @@ module.exports = class Subscription extends Component {
               <li>Connected to ${this._peers} peer(s)</li>
               <li>Downloaded ${this._downloaded}</li>
             </ul>
-          </div>
-          <div class="bottom-left" style="${this.options.payment ? '' : 'display: none;'}">
-            ${amount.element} ${new Button('Buy using Scatter App', { onclick: () => this.buy(amount.value) }).element}
+            <div style="${this.options.payment ? '' : 'display: none;'}">
+              ${amount.element}
+              ${new Button('Buy using Scatter App', {
+                onclick: () => this.buy(amount.value)
+              }).element}
+            </div>
           </div>
         </div>
       </div>
@@ -334,7 +348,10 @@ function infoMessage (info) {
     if (info.type === 'free') {
       return 'Stream is free of charge'
     } else if (info.type === 'time') {
-      return 'Subscription expires in ' + prettyMilliseconds(info.remaining, {compact: true})
+      return (
+        'Subscription expires in ' +
+        prettyMilliseconds(info.remaining, { compact: true })
+      )
     } else {
       return 'Unknown subscription type: ' + info.type
     }

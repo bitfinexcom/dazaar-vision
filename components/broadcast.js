@@ -32,7 +32,8 @@ const style = css`
     top: 0;
   }
 
-  :host:hover .overlay, :host.active .overlay {
+  :host:hover .overlay,
+  :host.active .overlay {
     opacity: 1;
   }
 
@@ -60,12 +61,11 @@ const style = css`
   :host .info {
     border-radius: 4px;
     background: rgba(92, 92, 108, 1);
-    padding: 10px;
+    padding: 1.5rem;
     color: #ffffff;
     font-size: 14px;
     line-height: 22px;
     letter-spacing: 0.02em;
-    text-align: center;
   }
 
   :host .info h3 {
@@ -80,7 +80,7 @@ const style = css`
 
   :host .overlay .middle {
     position: absolute;
-    top: calc(50% - 35px);
+    top: calc(80% - 35px);
     left: 0;
     right: 0;
   }
@@ -101,7 +101,7 @@ const style = css`
   :host ul {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 0 1rem;
   }
 `
 
@@ -110,60 +110,71 @@ module.exports = class Broadcast extends Component {
     super()
     this.options = opts || {}
     this.seller = opts.seller
-    this.onstop = this.options.onstop || noop
+    this.onstop = this.options.onstop || (() => {})
     this.timeout = null
     this.recording = null
     this._server = null
     this.uploadedBytes = 0
-    this._uploaded = html`<span>0 B</span>`
-    this._peers = html`<span>0</span>`
+    this._uploaded = html`
+      <span>0 B</span>
+    `
+    this._peers = html`
+      <span>0</span>
+    `
     this._record()
   }
 
   _record () {
     const feed = this.seller.feed
 
-    this.seller.on('buyer-feed', (feed) => {
+    this.seller.on('buyer-feed', feed => {
       feed.on('upload', (index, data) => {
         this.uploadedBytes += data.length
         this.update()
       })
     })
 
-    feed.ready((err) => {
+    feed.ready(err => {
       if (err) return
       if (feed.length === 0) {
-        feed.append(JSON.stringify({
-          description: this.options.description,
-          quality: this.options.quality,
-          video: this.options.video.deviceId,
-          audio: this.options.audio.deviceId,
-          payment: this.options.payment
-        }))
+        feed.append(
+          JSON.stringify({
+            description: this.options.description,
+            quality: this.options.quality,
+            video: this.options.video.deviceId,
+            audio: this.options.audio.deviceId,
+            payment: this.options.payment
+          })
+        )
       }
 
-      record({
-        quality: this.options.quality,
-        video: this.options.video,
-        audio: this.options.audio
-      }, (err, stream) => {
-        if (err) return
+      record(
+        {
+          quality: this.options.quality,
+          video: this.options.video,
+          audio: this.options.audio
+        },
+        (err, stream) => {
+          if (err) return
 
-        if (!this.seller) return stream.destroy()
-        this.recording = stream
-        pump(stream, cluster(), feed.createWriteStream())
+          if (!this.seller) return stream.destroy()
+          this.recording = stream
+          pump(stream, cluster(), feed.createWriteStream())
 
-        this._server = require('http').createServer(this._onrequest.bind(this))
-        this._server.listen(0, '127.0.0.1')
-        this.once(this._server, 'listening', this.start.bind(this))
-        this.swarm = require('dazaar/swarm')(this.seller)
-        this.swarm.on('connection', () => {
-          this.update()
-        })
-        this.swarm.on('disconnection', () => {
-          this.update()
-        })
-      })
+          this._server = require('http').createServer(
+            this._onrequest.bind(this)
+          )
+          this._server.listen(0, '127.0.0.1')
+          this.once(this._server, 'listening', this.start.bind(this))
+          this.swarm = require('dazaar/swarm')(this.seller)
+          this.swarm.on('connection', () => {
+            this.update()
+          })
+          this.swarm.on('disconnection', () => {
+            this.update()
+          })
+        }
+      )
     })
   }
 
@@ -226,7 +237,7 @@ module.exports = class Broadcast extends Component {
 
   copy () {
     if (!this.seller) return
-    this.seller.ready((err) => {
+    this.seller.ready(err => {
       if (err) return
 
       const card = {
@@ -250,19 +261,25 @@ module.exports = class Broadcast extends Component {
         <video></video>
         <div class="overlay">
           <div class="top-right">
-            ${new Button('Stop broadcasting', { onclick: this.stop.bind(this) }).element}
+            ${new Button('Stop broadcasting', { onclick: this.stop.bind(this) })
+              .element}
           </div>
           <div class="info top-left">
             <h3>${this.options.description || 'Video stream'}</h3>
             <ul>
               <li>Connected to ${this._peers} peer(s)</li>
               <li>Uploaded ${this._uploaded}</li>
-              <li>${this.options.payment ? 'You are charging for this stream' : 'Stream is free of charge'}</li>
+              <li>
+                ${this.options.payment
+                  ? 'You are charging for this stream'
+                  : 'Stream is free of charge'}
+              </li>
             </ul>
+            ${new Button('Copy Dazaar card', { onclick: this.copy.bind(this) })
+              .element}
           </div>
           <div class="middle" style="text-align: center;">
-            <h1>You are broadcasting!</h1>
-            ${new Button('Copy shareable Dazaar card', { onclick: this.copy.bind(this) }).element}
+            <h1>You are broadcasting</h1>
           </div>
         </div>
       </div>

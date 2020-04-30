@@ -5,17 +5,15 @@ const css = require('hui/css')
 const style = css`
   :host {
     color: #353248;
-    line-height: 16px;
-    font-size: 12px;
-    padding: 12px;
+    font-size: 100%;
     letter-spacing: 0.02em;
     outline: none;
     border-radius: 4px;
-    border: 0.5px solid rgba(53, 50, 72, 0.5);
+    border: 0.5px solid rgba(53, 50, 72, 0.1);
   }
 
   :host.error {
-    border: 0.5px solid #E83D4A;
+    border: 0.5px solid #e83d4a;
   }
 `
 
@@ -39,7 +37,13 @@ module.exports = class Input extends Component {
   }
 
   createElement () {
-    if (!this.options.disabled && this.options.disabled !== undefined) delete this.options.disabled
-    return html`<input class="${style + ' ' + (this.options.class || '')}" ${this.options}>`
+    if (!this.options.disabled && this.options.disabled !== undefined)
+      delete this.options.disabled
+    return html`
+      <input
+        class="p2 ${style + ' ' + (this.options.class || '')}"
+        ${this.options}
+      />
+    `
   }
 }

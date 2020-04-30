@@ -7,45 +7,31 @@ const Input = require('./input')
 
 const style = css`
   :host {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
-
-  :host .right {
-    background: white;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 300px;
-    padding-left: 60px;
+    display: grid;
+    position: relative;
+    grid-template-columns: 1fr 2fr;
+    height: 100%;
   }
 
   :host .left {
-    position: absolute;
-    background: rgba(245, 245, 246, 1);
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 300px;
+    padding-left: 4rem;
   }
-
+  :host main {
+    background: rgba(245, 245, 246, 1);
+  }
   :host .left .selected .text {
     font-weight: bold;
   }
 
   :host .left .bullet {
-    margin-bottom: 40px;
+    margin-bottom: 3rem;
     color: #353248;
-    margin-left: 70px;
-    font-family: "Open Sans" !important;
+    font-family: "Open Sans";
     font-style: normal;
     font-weight: 300;
-    font-size: 14px;
-    line-height: 26px;
+  }
+  :host .bullet:last-child {
+    margin-bottom: 0;
   }
 
   :host .left .selected .dot {
@@ -59,92 +45,65 @@ const style = css`
   }
 
   :host .left .dot {
-    line-height: 24px;
     background: #fff;
     display: inline-block;
-    margin-right: 10px;
-    border: 0.5px solid #000;
-    width: 24px;
-    height: 24px;
+    margin-right: 1rem;
+    font-family: var(--font-support);
+    letter-spacing: -.1em; /*anonymous font hack*/
+    border: 1px solid #102542;
+    width: 2.2rem; 
+    height: 2.2rem;
+    line-height: 2.2rem;
     text-align: center;
-    border-radius: 12px;
-  }
-
-  :host .left h1 {
-    margin-left: 70px;
-    margin-top: 60px;
-    margin-bottom: 50px;
-    font-weight: bold;
-    font-style: normal;
-    font-weight: normal;
-    font-size: 30px;
-    line-height: 70px;
-    letter-spacing: 0.02em;
-    color: #353248;
+    border-radius: 50%;
   }
 
   :host .left h3 {
     font-style: normal;
     font-weight: bold;
-    font-size: 16px;
     line-height: 35px;
     letter-spacing: 0.02em;
     color: #353248;
     margin-bottom: 0px;
   }
-
-  :host .title {
-    margin-top: 90px;
-    height: 70px;
-  }
-
-  :host .footer {
-    position: absolute;
-    left: 60px;
-    right: 40px;
-    border-top: 0.5px solid rgba(53, 50, 72, 0.5);
-    bottom: 0;
-    height: 80px;
-  }
-
-  .next-btn {
-    position: absolute;
-    right: 0px;
-    margin-top: 10px;
-  }
-
-  .footer a {
+  footer a {
     cursor: default;
     display: inline-block;
-    margin-top: 10px;
+    cursor: default;
     text-decoration: none;
     font-family: Open Sans;
-    line-height: 18px;
-    font-size: 14px;
     font-style: normal;
-    padding: 10px 20px;
+    padding: 1rem 2rem;
     padding-left: 0;
     text-align: center;
-    letter-spacing: 0.02em;
-    font-style: normal;
+    letter-spacing: 0.05em;
+    font-weight: bold;
     color: #000;
     outline: none;
     user-select: none;
   }
-
-  :host .configs input, :host .configs select {
-    margin-right: 30px;
-    margin-bottom: 30px;
-    width: 160px;
+  :host .configs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20ch, 1fr));
+    align-items: flex-start;
+    grid-gap: 1rem;
+    margin-bottom: 1rem;
   }
-
-  :host .configs .wide {
-    width: 350px;
+  :host .back-arrow:before {
+    content: ' ';
+    transform: rotate(-45deg);
+    display: inline-block;
+    min-width: .5rem;
+    min-height: .5rem;
+    border-width: .2rem 0 0 .2rem;
+    border-style: solid;
+    margin-right: .5rem;
+    margin-bottom: .15rem;
   }
 `
 
 module.exports = class Wizard extends Component {
-  constructor (views, opts) {
+  constructor(views, opts) {
     super()
 
     this.views = views
@@ -162,7 +121,7 @@ module.exports = class Wizard extends Component {
     }
   }
 
-  get value () {
+  get value() {
     const data = new Array(this._end)
     for (let i = 0; i < data.length; i++) {
       data[i] = this.views[i][1].value
@@ -170,7 +129,7 @@ module.exports = class Wizard extends Component {
     return data
   }
 
-  select (i) {
+  select(i) {
     if (i < 0) {
       this.oncancel()
     } else if (i >= this._end) {
@@ -181,7 +140,7 @@ module.exports = class Wizard extends Component {
     }
   }
 
-  render () {
+  render() {
     if (this._selected === this.selected) return
 
     for (let i = 0; i <= this.selected; i++) {
@@ -203,17 +162,17 @@ module.exports = class Wizard extends Component {
     }
   }
 
-  back () {
+  back() {
     this.select(this.selected - 1)
   }
 
-  next () {
+  next() {
     if (this.views[this.selected][1].validate()) {
       this.select(this.selected + 1)
     }
   }
 
-  createElement () {
+  createElement() {
     const bullets = this._bullets = this.views.map(([name], i) => {
       return html`
         <div class="bullet">
@@ -229,25 +188,45 @@ module.exports = class Wizard extends Component {
 
     return html`
       <div class=${style}>
-        <div class=left>
-          <h1>DAZAAR</h1>
+        <div class="p4 left">
+          <div class="df align-center mb4">
+          <svg
+            style="height: 3rem; width: 3rem; margin-left: -.4rem; margin-right: 1rem;"
+            viewBox="0 0 50 50">
+            <use
+              href="#emblem" 
+              style="--fill: url('#iris-gradient');"/>
+          </svg>
+          <h1 class="m0 p0 clip w-0 h-0">DAZAAR</h1>
+          <svg
+            style="height: 2rem;"
+            title="Dazaar"
+            viewBox="0 0 160 32">
+            <use 
+              href="#logo-letters"  
+              fill="hsla(var(--hue), var(--accentS),var(--accentL),1)"
+            />
+          </svg>
+        </div>
           <div class="bullets">
             ${bullets}
           </div>
         </div>
-        <div class=right>
-          <h3 class="title">${this._headline}</h3>
-          <div style="position: absolute; top: 180px; left: 60px; right: 40px; bottom: 170px;">
+        <main class="relative df p4 columns">
+          <header class="mb4">
+            <h3 class="m0">${this._headline}</h3>
+          </header>
+          <div class="flex">
             ${this._view}
           </div>
-          <div class="footer">
+          <footer class="df justify-between align-center bt1 b-spotlight b-solid pt2">
+            <a class="back-arrow" href="javascript:void(0)" onclick=${this.back.bind(this)}>Back</a>
             ${this._nextBtn}
-            <a href="javascript:void(0)" onclick=${this.back.bind(this)}>${'< Back'}</a>
           </div>
-        </div>
+        </main>
       </div>
     `
   }
 }
 
-function noop () {}
+function noop() { }

@@ -1,5 +1,65 @@
 <html>
-  <body>
+
+<head>
+    <link rel="stylesheet" href="./global.css">
+</head>
+
+<body>
+    <svg height="0" xmlns="http://www.w3.org/2000/svg" rel="svg-definitions" viewBox="0 0 0 0">
+      <defs>
+        <circle style="fill: var(--fill);" id="shape" cx="200" cy="200" r="180">
+        </circle>
+        <path id="triangle" d="" />
+        <path id="circle" d="" style="fill: var(--fill);" />
+        <linearGradient id="iris-gradient" gradientTransform="rotate(94)">
+          <stop 
+            offset="3%"
+            stop-color="hsl(
+                calc(var(--hue, var(--accentH)) + var(--gradientOffsetDownH)),
+                calc(var(--accentS) + var(--gradientOffsetDownS)),
+                calc(var(--accentL) + var(--gradientOffsetDownL))
+              )" />
+          <stop 
+            offset="67%"
+            stop-color="hsl(
+                calc(var(--hue, var(--accentH)) + var(--gradientOffsetUpH)),
+                calc(var(--accentS) + var(--gradientOffsetUpS)),
+                calc(var(--accentL) + var(--gradientOffsetUpL))
+              )" />
+        </linearGradient>
+        <radialGradient id="ripple-gradient">
+          <stop 
+            offset="50%"
+            stop-color="hsl(
+                calc(var(--hue, var(--accentH)) + var(--gradientOffsetDownH)),
+                calc(var(--accentS) + var(--gradientOffsetDownS)),
+                calc(var(--accentL) + var(--gradientOffsetDownL))
+              )" />
+          <stop 
+            offset="100%"
+            stop-color="hsl(
+                calc(var(--hue, var(--accentH)) + var(--gradientOffsetUpH)),
+                calc(var(--accentS) + var(--gradientOffsetUpS)),
+                calc(var(--accentL) + var(--gradientOffsetUpL))
+              )" />
+        </radialGradient>
+        <g id="emblem">
+          <circle cx="25" cy="25" r="25" style="fill: var(--fill);" />
+          <circle cx="25" cy="25" r="12" class="highlight" fill="currentColor" />
+        </g>
+        <g id="logo-letters" stroke="none" fill="currentColor">
+          <title>Dazaar logo</title>
+          <path d="M0 0.451208L9.10359 0.424667C13.0051 0.424667 15.8981 1.69864 17.7825 4.29967C19.6669 6.9007 20.6224 10.6695 20.649 15.6593C20.6755 20.649 19.7466 24.4444 17.8622 27.0454C15.9777 29.6464 13.1113 30.9469 9.20976 30.9735L0.106163 31L0 0.451208ZM8.86473 26.9127C11.1207 26.9127 12.7663 26.143 13.8544 24.6567C14.9426 23.1439 15.4735 20.994 15.4735 18.2072L15.4469 13.1379C15.4469 10.351 14.8896 8.20121 13.7748 6.68837C12.6866 5.20207 11.0146 4.43237 8.75856 4.45891H4.83048L4.9101 26.9392L8.86473 26.9127Z" />
+          <path d="M43.6984 30.8408L41.3628 22.6661L31.6487 22.6926L29.3662 30.8673L24.3765 30.8938L33.2146 0.371573L39.903 0.345032L48.9004 30.8408H43.6984ZM36.4527 5.28168L32.5511 18.6584L40.4073 18.6318L36.4527 5.28168Z"/>
+          <path d="M99.007 30.8408L96.6714 22.6661L86.9573 22.6926L84.6748 30.8673L79.6851 30.8938L88.4967 0.371573L95.1851 0.345032L104.209 30.8142L99.007 30.8408ZM91.7613 5.28168L87.8597 18.6584L95.7159 18.6318L91.7613 5.28168Z"/>
+          <path d="M128.32 30.8408L125.985 22.6661L116.271 22.6926L113.988 30.8673L108.999 30.8938L117.837 0.371573L124.525 0.345032L133.523 30.8408H128.32ZM121.101 5.28168L117.2 18.6584L125.056 18.6318L121.101 5.28168Z"/>
+          <path d="M74.8696 30.655L53.7163 30.7081V25.7714L69.0571 4.77742L54.2471 4.8305V0.371594L74.2326 0.318512V5.25516L58.8918 26.2492L74.8961 26.1961L74.8696 30.655Z" />
+          <path d="M143.275 30.5223L138.418 30.5488L138.312 0.0265411L149.724 0C152.644 0 154.873 0.796233 156.386 2.41524C157.925 4.03425 158.695 6.2637 158.695 9.13014C158.695 11.4658 158.138 13.3767 156.996 14.8896C155.855 16.4024 154.236 17.3313 152.113 17.7029L159.199 30.4957L153.785 30.5223L147.282 18.1807H143.222L143.275 30.5223ZM149.087 14.2526C152.113 14.2526 153.626 12.8459 153.626 10.0591V8.17466C153.626 5.38784 152.086 4.00771 149.061 4.00771L143.195 4.03425L143.222 14.2526H149.087Z" />
+        </g>
+      </defs>
+    </svg>
+
     <script src="./index.bundle.js"></script>
-  </body>
+</body>
+
 </html>

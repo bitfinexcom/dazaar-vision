@@ -5,17 +5,16 @@ const css = require('hui/css')
 const style = css`
   :host {
     font-family: Open Sans;
-    line-height: 18px;
-    font-size: 14px;
+    font-weight: 600;
     font-style: normal;
-    padding: 10px 20px;
+    font-size: 1rem;
+    padding: 1rem 2.5rem;
     text-align: center;
-    letter-spacing: 0.02em;
-    font-style: normal;
-    background-color: #E83D4A;
-    border-radius: 4px;
+    letter-spacing: 0.05em;
+    background-color: #EC375B;
+    border-radius: 2.5rem;
     border: none;
-    color: #FFFFFF;
+    color: #ffffff;
     outline: none;
     transition: background-color 0.25s ease;
     user-select: none;
@@ -26,24 +25,22 @@ const style = css`
   }
 
   :host:disabled {
-    background-color: rgba(125, 124, 137, 1);
-    color: rgba(53, 50, 72, 1);
+    background-color: rgba(237, 160, 173, 1);
+    color: rgba(252, 241, 243, 1);
   }
 
   :host.border {
-    border: 2px solid #D34C50;
-    background-color: #353248;
-    line-height: 16px;
-    color: #D34C50;
+    border: 1px solid #EC375B;
+    color: #EC375B;
+    background: transparent;
   }
 
   :host.border:disabled {
-    background-color: rgba(53, 50, 72, 0.05);
-    color: rgba(125, 124, 137, 1);
+    opacity: 0.5;
   }
 
   :host.border:hover {
-    background-color: rgba(96, 61, 73, 1);
+    background-color: rgba(138, 70, 77, 0.1);
   }
 `
 
@@ -65,7 +62,14 @@ module.exports = class Button extends Component {
   }
 
   createElement () {
-    return html`<button class="${style} ${this.border ? 'border' : ''} ${this.class || ''}" onclick=${this.onclick}>${this.text}</button>`
+    return html`
+      <button
+        class="${style} ${this.border ? 'border' : ''} ${this.class || ''}"
+        onclick=${this.onclick}
+      >
+        ${this.text}
+      </button>
+    `
   }
 }
 

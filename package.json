@@ -11,7 +11,7 @@
     ]
   },
   "build": {
-    "copyright": "© 2019,BitfinexS",
+    "copyright": "© 2019, Bitfinex",
     "artifactName": "${productName}.${ext}",
     "appId": "com.bitfinex.dazaarvision",
     "productName": "Dazaar Vision",
@@ -36,13 +36,17 @@
     ]
   },
   "dependencies": {
+    "@hyperswarm/replicator": "^1.7.0",
+    "@mafintosh/search-component": "^1.0.1",
     "dazaar": "github:bitfinexcom/dazaar",
     "dazaar-payment": "github:bitfinexcom/dazaar-payment",
     "dazaar-scatter-pay": "github:bitfinexcom/dazaar-scatter-pay",
     "hui": "^1.2.5",
     "hypercore": "^8.2.5",
     "hypercore-crypto": "^1.0.0",
+    "hyperindex": "^1.0.1",
     "media-recorder-stream": "^2.1.1",
+    "nanoiterator": "^1.2.1",
     "prettier-bytes": "^1.0.4",
     "pretty-ms": "^5.0.0",
     "pump": "^3.0.0",

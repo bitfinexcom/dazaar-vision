@@ -11,7 +11,7 @@ class SelectStreamWizard extends Component {
   constructor (list) {
     super()
     this.existing = []
-    this.select = new Select([['Create new stream', null]], { class: 'wide' })
+    this.select = new Select([['Create new stream', null]], { class: 'wide', border: true })
     if (list) {
       list((err, list) => {
         if (err) return
@@ -25,10 +25,15 @@ class SelectStreamWizard extends Component {
     const list = [['Create new stream', null]]
     for (const e of this.existing) {
       let n = e.description
-      n += (n ? ' (' : '') + e.key.toString('hex').slice(0, 8) + '...' + e.key.toString('hex').slice(-4) + (n ? ')' : '')
+      n +=
+        (n ? ' (' : '') +
+        e.key.toString('hex').slice(0, 8) +
+        '...' +
+        e.key.toString('hex').slice(-4) +
+        (n ? ')' : '')
       list.push(['Resume ' + n, e])
     }
-    const s = new Select(list, { class: 'wide' })
+    const s = new Select(list, { class: 'wide', border: true })
     this.select.element.replaceWith(s.element)
     this.select = s
   }
@@ -44,6 +49,7 @@ class SelectStreamWizard extends Component {
   createElement () {
     return html`
       <div>
+        <h4>Select stream</h4>
         <div class="configs">
           ${this.select.element}
         </div>
@@ -57,9 +63,23 @@ class PaymentWizard extends Component {
     super()
     this._select = s
     this._amount = new Input({ placeholder: 'Amount' })
-    this._currency = new Select([['EOS', 'EOS'], ['EOS Testnet', 'EOS Testnet'], ['Free', 'free']], { placeholder: 'Currency', border: true })
+    this._currency = new Select(
+      [
+        ['EOS', 'EOS'],
+        ['EOS Testnet', 'EOS Testnet'],
+        ['Free', 'free']
+      ],
+      { placeholder: 'Currency', border: true }
+    )
     this._perUnit = new Input({ placeholder: 'Per time interval' })
-    this._timeUnit = new Select([['Seconds', 'seconds'], ['Minutes', 'minutes'], ['Hours', 'hours']], { border: true })
+    this._timeUnit = new Select(
+      [
+        ['Seconds', 'seconds'],
+        ['Minutes', 'minutes'],
+        ['Hours', 'hours']
+      ],
+      { border: true }
+    )
     this._payTo = new Input({ placeholder: 'Pay to address', class: 'wide' })
   }
 
@@ -135,15 +155,10 @@ class PaymentWizard extends Component {
     this.check()
     return html`
       <div>
+        <h4>Payment Options</h4>
         <div class="configs">
-          <div class="row">
-            ${this._amount.element}
-            ${this._currency.element}
-          </div>
-          <div class="row">
-            ${this._perUnit.element}
-            ${this._timeUnit.element}
-          </div>
+          ${this._amount.element} ${this._currency.element}
+          ${this._perUnit.element} ${this._timeUnit.element}
           ${this._payTo.element}
         </div>
       </div>
@@ -155,10 +170,17 @@ class QualityWizard extends Component {
   constructor (select) {
     super()
     this._select = select
-    this._quality = new Select([['High', 2], ['Medium', 1], ['Low', 0]], { placeholder: 'Quality', border: true })
+    this._quality = new Select(
+      [
+        ['High', 2],
+        ['Medium', 1],
+        ['Low', 0]
+      ],
+      { placeholder: 'Quality', border: true }
+    )
     this._video = new Select([], { placeholder: 'Video device', border: true })
     this._audio = new Select([], { placeholder: 'Audio device', border: true })
-    this._description = new Input({ placeholder: 'Video description'})
+    this._description = new Input({ placeholder: 'Video description' })
     this.devices = []
     devices((err, list) => {
       if (err) return console.error('device error:', err)
@@ -177,9 +199,14 @@ class QualityWizard extends Component {
     for (const dev of this.devices) {
       if (dev.deviceId === 'default') continue
 
-      const r = dev.kind === 'audioinput' ? a :
-        dev.kind === 'videoinput' ? v :
-        dev.kind === 'screen' ? v : []
+      const r =
+        dev.kind === 'audioinput'
+          ? a
+          : dev.kind === 'videoinput'
+          ? v
+          : dev.kind === 'screen'
+          ? v
+          : []
 
       r.push([dev.label, dev])
     }
@@ -251,19 +278,10 @@ class QualityWizard extends Component {
     this.check()
     return html`
       <div>
+        <h4>Stream Options</h4>
         <div class="configs">
-          <div class="row">
-            ${this._quality.element}
-          </div>
-          <div class="row">
-            ${this._video.element}
-          </div>
-          <div class="row">
-            ${this._audio.element}
-          </div>
-          <div class="row">
-            ${this._description.element}
-          </div>
+          ${this._quality.element} ${this._video.element} ${this._audio.element}
+          ${this._description.element}
         </div>
       </div>
     `
@@ -273,14 +291,17 @@ class QualityWizard extends Component {
 module.exports = class BroadcastWizard extends Wizard {
   constructor (opts = {}) {
     const s = new SelectStreamWizard(opts.list)
-    super([
-      ['Select Stream', s],
-      ['Payment options', new PaymentWizard(s)],
-      ['Stream options', new QualityWizard(s)],
-      ['Broadcast', null]
-    ], {
-      title: 'Start broadcast',
-      ...opts
-    })
+    super(
+      [
+        ['Select Stream', s],
+        ['Payment options', new PaymentWizard(s)],
+        ['Stream options', new QualityWizard(s)],
+        ['Broadcast', null]
+      ],
+      {
+        title: 'Start broadcast',
+        ...opts
+      }
+    )
   }
 }
