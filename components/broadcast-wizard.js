@@ -390,22 +390,23 @@ module.exports = class BroadcastWizard extends Wizard {
   }
 }
 
-function loadConfig (dir) {
+function tryRead (name, enc) {
   try {
-    let config = fs.readFileSync(path.join(dir, 'lnd.conf'), 'utf-8').split('rpclisten=')[1]
-    if (config) config = config.split('\n')[0]
-    if (config) config = config.trim()
-
-    return {
-      host: config || '',
-      cert: fs.readFileSync(path.join(dir, 'tls.cert'), 'base64'),
-      macaroon: fs.readFileSync(path.join(dir, 'data/chain/bitcoin', LND_NETWORK, 'admin.macaroon'), 'base64')
-    }
+    return fs.readFileSync(name, enc)
   } catch (_) {
-    return {
-      host: '',
-      cert: '',
-      macaroon: ''
-    }
+    return ''
+  }
+}
+
+function loadConfig (dir) {
+  let config = tryRead(path.join(dir, 'lnd.conf'), 'utf-8')
+  if (config) config = config.split('rpclisten=')[1]
+  if (config) config = config.split('\n')[0]
+  if (config) config = config.trim()
+
+  return {
+    host: config || '',
+    cert: tryRead(path.join(dir, 'tls.cert'), 'base64'),
+    macaroon: tryRead(path.join(dir, 'data/chain/bitcoin', LND_NETWORK, 'admin.macaroon'), 'base64')
   }
 }
