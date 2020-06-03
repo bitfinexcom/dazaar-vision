@@ -21,12 +21,11 @@ const style = css`
   }
 
   :host:hover {
-    background-color: rgba(138, 70, 77, 1);
+    background-color: #E91640;
   }
 
   :host:disabled {
-    background-color: rgba(237, 160, 173, 1);
-    color: rgba(252, 241, 243, 1);
+    background-color: rgba(236, 55, 91, 0.5);
   }
 
   :host.border {
@@ -35,12 +34,21 @@ const style = css`
     background: transparent;
   }
 
-  :host.border:disabled {
-    opacity: 0.5;
+  :host.border:hover {
+    border: 1px solid #E91640;
+    color: #E91640;
+    background: transparent;
   }
 
-  :host.border:hover {
-    background-color: rgba(138, 70, 77, 0.1);
+  :host.border-dark {
+    border: 1px solid #fff;
+    color: #fff;
+    background: transparent;
+  }
+
+  :host.border-dark:disabled {
+    border: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.5);
   }
 `
 
@@ -58,13 +66,14 @@ module.exports = class Button extends Component {
     this.text = text || ''
     this.onclick = opts.onclick || noop
     this.border = !!opts.border
+    this.dark = !!opts.dark
     this.class = opts.class
   }
 
   createElement () {
     return html`
       <button
-        class="${style} ${this.border ? 'border' : ''} ${this.class || ''}"
+        class="${style} ${this.border ? (this.dark ? 'border-dark' : 'border') : ''} ${this.class || ''}"
         onclick=${this.onclick}
       >
         ${this.text}

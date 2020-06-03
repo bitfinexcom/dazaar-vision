@@ -1,11 +1,28 @@
 const css = require('hui/css')
 const html = require('hui/html')
 const Component = require('hui')
+const path = require('path')
+const fs = require('fs')
 const Select = require('./select')
 const Button = require('./button')
 const Input = require('./input')
 const Wizard = require('./wizard')
 const { devices } = require('../lib/webm-broadcast-stream.js')
+
+// allow setting this in the console
+window.LND_NETWORK = 'mainnet'
+
+const cls = css`
+  :host > .lnd-config {
+    display: none;
+  }
+  :host.lnd-config > .configs.lnd-config {
+    display: grid;
+  }
+  :host.lnd-config > .lnd-config {
+    display: block;
+  }
+`
 
 class SelectStreamWizard extends Component {
   constructor (list) {
@@ -59,17 +76,26 @@ class SelectStreamWizard extends Component {
 }
 
 class PaymentWizard extends Component {
-  constructor (s) {
+  constructor (s, defaultConfig) {
     super()
+    const self = this
     this._select = s
     this._amount = new Input({ placeholder: 'Amount' })
+    let prev = ''
     this._currency = new Select(
       [
-        ['EOS', 'EOS'],
-        ['EOS Testnet', 'EOS Testnet'],
+        ['Lightning Satoshis', 'lnd'],
         ['Free', 'free']
       ],
-      { placeholder: 'Currency', border: true }
+      {
+        placeholder: 'Currency',
+        border: true,
+        onchange () {
+          self.element.classList.remove(prev + '-config')
+          self.element.classList.add(self._currency.value + '-config')
+          prev = self._currency.value
+        }
+      }
     )
     this._perUnit = new Input({ placeholder: 'Per time interval' })
     this._timeUnit = new Select(
@@ -80,7 +106,31 @@ class PaymentWizard extends Component {
       ],
       { border: true }
     )
-    this._payTo = new Input({ placeholder: 'Pay to address', class: 'wide' })
+
+    this._lightningDir = new Input({
+      placeholder: 'Lightning directory',
+      type: 'file',
+      webkitdirectory: true,
+      onchange (e) {
+        const dir = path.dirname(this.files[0].path)
+        const conf = loadConfig(dir)
+
+        if (conf.host) self._lightningAddress.value = conf.host
+        if (conf.cert) self._lightningCert.value = conf.cert
+        if (conf.macaroon) self._lightningMacaroon.value = conf.macaroon
+      }
+    })
+
+    this._lightningAddress = new Input({ placeholder: 'RPC Host' })
+    this._lightningMacaroon = new Input({ placeholder: 'Macaroon' })
+    this._lightningCert = new Input({ placeholder: 'TLS Cert' })
+
+    const conf = defaultConfig && defaultConfig.LightningSats
+    if (conf) {
+      if (conf.host) self._lightningAddress.value = conf.host
+      if (conf.cert) self._lightningCert.value = conf.cert
+      if (conf.macaroon) self._lightningMacaroon.value = conf.macaroon
+    }
   }
 
   validate () {
@@ -93,7 +143,12 @@ class PaymentWizard extends Component {
     if (c !== 'free') {
       notEmpty(this._amount)
       notEmpty(this._perUnit)
-      notEmpty(this._payTo)
+    }
+
+    if (c === 'lnd') {
+      notEmpty(this._lightningMacaroon)
+      notEmpty(this._lightningAddress)
+      notEmpty(this._lightningCert)
     }
 
     return valid
@@ -115,12 +170,22 @@ class PaymentWizard extends Component {
       return null
     }
 
+    if (c !== 'lnd') throw new Error('Only LND is supported currently')
+
     return {
-      currency: c,
-      amount: this._amount.value || '0',
-      interval: Number(this._perUnit.value) || 0,
-      unit: this._timeUnit.value,
-      payTo: this._payTo.value
+      payment: {
+        currency: 'LightningSats',
+        amount: this._amount.value || '0',
+        interval: Number(this._perUnit.value) || 0,
+        unit: this._timeUnit.value
+      },
+      config: {
+        implementation: 'lnd',
+        cert: this._lightningCert.value,
+        network: LND_NETWORK,
+        host: this._lightningAddress.value,
+        macaroon: this._lightningMacaroon.value
+      }
     }
   }
 
@@ -132,34 +197,53 @@ class PaymentWizard extends Component {
     if (this._select.value) {
       const v = this._select.value
       const p = v.payment
+      const config = v.config
+      const currency = (p && (p.currency === 'LightningSats' ? 'lnd' : p.currency)) || 'free'
+
       this._amount.element.setAttribute('disabled', 'disabled')
       this._amount.value = p ? p.amount : ''
       this._currency.element.setAttribute('disabled', 'disabled')
-      this._currency.value = p ? p.currency : 'free'
+      this._currency.value = currency
       this._perUnit.element.setAttribute('disabled', 'disabled')
       this._perUnit.value = p ? p.interval : ''
       this._timeUnit.element.setAttribute('disabled', 'disabled')
       this._timeUnit.value = p ? p.unit : ''
-      this._payTo.element.setAttribute('disabled', 'disabled')
-      this._payTo.value = p ? p.payTo : ''
+
+      if (p.currency === 'LightningSats') {
+        this.element.classList.add('lnd-config')
+        if (config) {
+          this._lightningCert.value = config.cert
+          this._lightningAddress.value = config.host
+          this._lightningMacaroon.value = config.macaroon
+        }
+      }
     } else {
       this._amount.element.removeAttribute('disabled', 'disabled')
       this._currency.element.removeAttribute('disabled', 'disabled')
       this._perUnit.element.removeAttribute('disabled', 'disabled')
       this._timeUnit.element.removeAttribute('disabled', 'disabled')
-      this._payTo.element.removeAttribute('disabled', 'disabled')
+      this._lightningDir.element.removeAttribute('disabled', 'disabled')
+      this._lightningCert.element.removeAttribute('disabled', 'disabled')
+      this._lightningAddress.element.removeAttribute('disabled', 'disabled')
+      this._lightningMacaroon.element.removeAttribute('disabled', 'disabled')
     }
   }
 
   createElement () {
-    this.check()
+    process.nextTick(() => this.check())
     return html`
-      <div>
+      <div class=${cls}>
         <h4>Payment Options</h4>
         <div class="configs">
           ${this._amount.element} ${this._currency.element}
           ${this._perUnit.element} ${this._timeUnit.element}
-          ${this._payTo.element}
+        </div>
+        <h4 class="lnd-config">LND Lightning Configuration</h4>
+        <div class="configs lnd-config">
+          ${this._lightningDir.element}
+          ${this._lightningAddress.element}
+          ${this._lightningCert.element}
+          ${this._lightningMacaroon.element}
         </div>
       </div>
     `
@@ -294,7 +378,7 @@ module.exports = class BroadcastWizard extends Wizard {
     super(
       [
         ['Select Stream', s],
-        ['Payment options', new PaymentWizard(s)],
+        ['Payment options', new PaymentWizard(s, opts.defaultConfig)],
         ['Stream options', new QualityWizard(s)],
         ['Broadcast', null]
       ],
@@ -303,5 +387,25 @@ module.exports = class BroadcastWizard extends Wizard {
         ...opts
       }
     )
+  }
+}
+
+function loadConfig (dir) {
+  try {
+    let config = fs.readFileSync(path.join(dir, 'lnd.conf'), 'utf-8').split('rpclisten=')[1]
+    if (config) config = config.split('\n')[0]
+    if (config) config = config.trim()
+
+    return {
+      host: config || '',
+      cert: fs.readFileSync(path.join(dir, 'tls.cert'), 'base64'),
+      macaroon: fs.readFileSync(path.join(dir, 'data/chain/bitcoin', LND_NETWORK, 'admin.macaroon'), 'base64')
+    }
+  } catch (_) {
+    return {
+      host: '',
+      cert: '',
+      macaroon: ''
+    }
   }
 }

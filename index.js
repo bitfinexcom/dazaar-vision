@@ -1,6 +1,7 @@
 const Button = require('./components/button')
 const css = require('hui/css')
 const html = require('hui/html')
+
 const BroadcastWizard = require('./components/broadcast-wizard')
 const SubscribeWizard = require('./components/subscribe-wizard')
 const Broadcast = require('./components/broadcast')
@@ -10,10 +11,13 @@ const crypto = require('hypercore-crypto')
 const electron = require('electron')
 const path = require('path')
 const userDataPath = (electron.app || electron.remote.app).getPath('userData')
-const dataPath = path.join(userDataPath, './dazaar-vision-data')
+const dataPath = path.join(userDataPath, './dazaar-vision-data-tmp')
 const dazaar = require('dazaar')(dataPath)
-const Payment = require('dazaar-payment')
+const Payment = require('dazaar-payment-lightning')
 const fs = require('fs')
+const thunky = require('thunky')
+
+let loadDefaultConfig = thunky(loadConf)
 
 class Settings {
   constructor (dataPath) {
@@ -35,7 +39,6 @@ class Settings {
     })
   }
 }
-
 
 console.log('Storing data in', dataPath)
 
@@ -161,52 +164,62 @@ function subscribe () {
 
 function broadcast () {
   cycleColor = false
-  const bw = new BroadcastWizard({
-    list (cb) {
-      dazaar.selling(function (err, keys) {
-        if (err) return cb(err)
-        loadInfo(keys, false, cb)
-      })
-    },
-    ondone () {
-      let [existing, payment, devices] = bw.value
-      const feed = createFeed(existing && existing.feed)
-      let pay = null
-      const seller = dazaar.sell(feed, {
-        validate (remoteKey, done) {
-          console.log('validate', remoteKey, payment)
-          if (!payment) return done(null, { type: 'free' })
-          pay.validate(remoteKey, function (err, info) {
-            console.log('done', err, info)
-            done(err, info)
-          })
-        }
-      })
-      seller.ready(function () {
-        if (payment && !Array.isArray(payment)) payment = [payment]
-        pay = new Payment(seller.key, payment)
-      })
-      const b = new Broadcast({
-        payment,
-        video: devices.video,
-        audio: devices.audio,
-        quality: devices.quality,
-        description: devices.description,
-        seller,
-        onstop () {
-          if (pay) pay.destroy()
-          changeMainView(main)
-        }
-      })
 
-      changeMainView(b.element)
-    },
-    oncancel () {
-      changeMainView(main)
-    }
+  loadDefaultConfig(function (_, defaultConfig) {
+    const bw = new BroadcastWizard({
+      defaultConfig,
+      list (cb) {
+        dazaar.selling(function (err, keys) {
+          if (err) return cb(err)
+          loadInfo(keys, false, cb)
+        })
+      },
+      ondone () {
+        let [existing, p, devices] = bw.value
+        const payment = p && p.payment
+        const config = p && p.config
+
+        const feed = createFeed(existing && existing.feed)
+        let pay = null
+        const seller = dazaar.sell(feed, {
+          validate (remoteKey, done) {
+            console.log('validate', remoteKey, payment)
+            if (!payment) return done(null, { type: 'free' })
+            pay.validate(remoteKey, function (err, info) {
+              console.log('done', err, info)
+              done(err, info)
+            })
+          }
+        })
+
+        if (payment) dazaar.setConfig(payment.currency, config)
+
+        seller.ready(function () {
+          if (payment) pay = new Payment(seller, payment, config)
+        })
+
+        const b = new Broadcast({
+          payment,
+          video: devices.video,
+          audio: devices.audio,
+          quality: devices.quality,
+          description: devices.description,
+          seller,
+          onstop () {
+            if (pay) pay.destroy()
+            changeMainView(main)
+          }
+        })
+
+        changeMainView(b.element)
+      },
+      oncancel () {
+        changeMainView(main)
+      }
+    })
+
+    changeMainView(bw.element)
   })
-
-  changeMainView(bw.element)
 }
 
 function mute () {
@@ -215,6 +228,10 @@ function mute () {
 }
 
 function changeMainView (el) {
+  if (el === main) {
+    loadDefaultConfig = thunky(loadConf)
+    loadDefaultConfig()
+  }
   // TODO: raf me
   view.replaceWith(el)
   view = el
@@ -251,13 +268,33 @@ function loadInfo (keys, buyer, cb) {
       if (err) return loop()
       try {
         data = JSON.parse(data)
+      } catch (_) {
+        data = {}
+      }
+
+      if (!data.payment) return onconfig(null, null)
+      dazaar.getConfig(data.payment.currency, onconfig)
+
+      function onconfig (err, config) {
+        if (err) return feed.close(loop)
+
         result.push({
           key: k.key,
           feed: k.feed,
+          config,
           ...data
         })
-      } catch (_) {}
-      feed.close(loop)
+
+        feed.close(loop)
+      }
     })
   }
+}
+
+function loadConf (cb) {
+  const defaults = {}
+  dazaar.getConfig('LightningSats', function (_, conf) {
+    if (conf) defaults.LightningSats = conf
+    cb(null, defaults)
+  })
 }
