@@ -41,21 +41,21 @@ const style = css`
     position: absolute;
     right: 0;
     bottom: 0;
-    margin: 10px;
+    margin: 20px;
   }
 
   :host .overlay .top-right {
     position: absolute;
     right: 0;
     top: 0;
-    margin: 10px;
+    margin: 20px;
   }
 
   :host .overlay .top-left {
     position: absolute;
     left: 0;
     top: 0;
-    margin: 10px;
+    margin: 20px;
   }
 
   :host .info {
@@ -86,6 +86,7 @@ const style = css`
   }
 
   :host h1 {
+    font-weight: normal;
     margin: 0;
     color: #ffffff;
     text-align: center;

@@ -19,8 +19,6 @@ app.on('ready', function () {
   }
 })
 
-require('./electron')
-
 function onContextMenu (event, params) {
   const { editFlags } = params
   const hasText = params.selectionText.trim().length > 0

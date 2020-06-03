@@ -141,6 +141,14 @@ class SearchContainer extends Component {
     }
   }
 
+  get value () {
+    return this.search.value
+  }
+
+  validate () {
+    return !!this.value
+  }
+
   createElement () {
     const self = this
     const inp = document.createElement('input')

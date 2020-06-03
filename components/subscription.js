@@ -4,20 +4,12 @@ const html = require('hui/html')
 const Component = require('hui')
 const Input = require('./input')
 const pump = require('pump')
+const Payment = require('dazaar-payment-lightning')
 const prettierBytes = require('prettier-bytes')
-const { ipcRenderer } = require('electron')
 const prettyMilliseconds = require('pretty-ms')
-
-let ID = 0
-const REPLY = new Map()
-
-ipcRenderer.on('scatter-reply', function (event, data) {
-  const id = data.id
-  const cb = REPLY.get(id)
-  REPLY.delete(id)
-  const error = data.error ? new Error(data.error) : null
-  if (cb) cb(error)
-})
+const cpu = require('crypto-payment-url')
+const qr = require('crypto-payment-url/qrcode')
+const { clipboard } = require('electron')
 
 const style = css`
   :host {
@@ -62,23 +54,27 @@ const style = css`
   :host .overlay .bottom {
     position: absolute;
     right: 0;
-    bottom: 0;
+    bottom: 20px;
     left: 0;
-    margin: 10px;
+    padding: 20px;
+  }
+
+  :host .overlay .controls {
+    background-color: rgba(92, 92, 108, 1);
   }
 
   :host .overlay .top-right {
     position: absolute;
     right: 0;
     top: 0;
-    margin: 10px;
+    margin: 20px;
   }
 
   :host .overlay .top-left {
     position: absolute;
     left: 0;
     top: 0;
-    margin: 10px;
+    margin: 20px;
   }
 
   :host .info {
@@ -127,6 +123,9 @@ module.exports = class Subscription extends Component {
     super()
     this.options = opts
     this.buyer = this.options.buyer
+
+    this.payment = new Payment(this.buyer, null)
+
     this.onstop = this.options.onstop || noop
     this._desc = html`
       <span>Waiting for description</span>
@@ -142,15 +141,12 @@ module.exports = class Subscription extends Component {
     `
     this._server = null
     this._gotoEnd = true
+    this._invoiceEl = null
     this.currentFrame = 0
     this._serverStream = null
     this._amount = null
     this._timeout = null
     this.downloadBytes = 0
-    this._payInfo = html`
-      <span></span>
-    `
-    this._payInfoHide = null
     this.swarm = null
     this._subscribe()
   }
@@ -183,7 +179,7 @@ module.exports = class Subscription extends Component {
     this.buyer.on('valid', info => {
       this._info.innerText = infoMessage(info)
       if (!hoverState) return
-      this._timeout = setTimeout(() => this.element.classList.remove('active'))
+      this._timeout = setTimeout(() => this.element.classList.remove('active'), 1000)
     })
 
     function onfeed (feed) {
@@ -274,32 +270,45 @@ module.exports = class Subscription extends Component {
   }
 
   buy (amount) {
-    const id = ID++
+    const self = this
 
-    ipcRenderer.send('scatter', {
-      id,
-      seller: this.buyer.seller.toString('hex'),
-      buyer: this.buyer.key.toString('hex'),
-      amount,
-      payment: this.options.payment
-    })
+    this.payment.requestInvoice(amount, function (err, inv) {
+      if (err) throw err
 
-    REPLY.set(id, err => {
-      this._amount.value = ''
-      if (err) this._payInfo.innerText = err.message
-      else this._payInfo.innerText = 'Payment succeeded! Please wait.'
+      self._invoiceEl.style.display = 'block'
+      const a = self._invoiceEl.querySelector('.qrcode')
+      const { url, qrcode } = qr.bitcoin({ lightning: inv.request })
+      a.href = url
+      a.innerHTML = qrcode
 
-      clearTimeout(this._payInfoHide)
-      this._payInfoHide = setTimeout(() => {
-        this._payInfo.innerText = ''
-      }, 6000)
+      const span = self._invoiceEl.querySelector('.amount')
+      span.innerText = amount + ' Satoshis'
     })
   }
 
   createElement () {
     const amount = (this._amount = new Input({
-      placeholder: 'Enter amount, ie. 0.1234 EOS'
+      placeholder: 'Enter Satoshis'
     }))
+
+    const invoiceEl = this._invoiceEl = html`
+      <div style="display: none;">
+        <h3 style="margin: 15px 0;">Scan or click to open LN invoice</h3>
+        <a class="qrcode" style="display: block" href="#"></a>
+        <div style="margin-top: 10px;">
+          <span class="amount" style="margin-right: 10px">0 Satoshis</span>
+          <a class="copy" href="#" onclick=${onclick}>Copy invoice</a>
+        </div>
+      </div>
+    `
+
+    function onclick (e) {
+      const invoice = invoiceEl.querySelector('.qrcode').href.split('lightning=')[1]
+      console.log(invoice)
+      clipboard.writeText(invoice)
+      e.preventDefault()
+    }
+
     return html`
       <div class="${style}">
         <video></video>
@@ -308,16 +317,17 @@ module.exports = class Subscription extends Component {
             ${new Button('Stop watching', { onclick: this.stop.bind(this) })
               .element}
           </div>
-          <div class="bottom df justify-between align-center">
+          <div class="controls bottom df justify-between align-center">
             ${new Button('Go to start', {
+              dark: true,
               border: true,
               onclick: this.gotoStart.bind(this)
             }).element}
             <div class="flex" style="text-align: center;">
               <h1>${this._info}</h1>
-              <h3 style="color: white;">${this._payInfo}</h3>
             </div>
             ${new Button('Go to end', {
+              dark: true,
               border: true,
               onclick: this.gotoEnd.bind(this)
             }).element}
@@ -330,10 +340,11 @@ module.exports = class Subscription extends Component {
             </ul>
             <div style="${this.options.payment ? '' : 'display: none;'}">
               ${amount.element}
-              ${new Button('Buy using Scatter App', {
-                onclick: () => this.buy(amount.value)
+              ${new Button('Buy', {
+                onclick: () => this.buy(Number(amount.value))
               }).element}
             </div>
+            ${invoiceEl}
           </div>
         </div>
       </div>

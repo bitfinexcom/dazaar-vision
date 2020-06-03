@@ -20,7 +20,7 @@ const style = css`
 
   :host.border[disabled] {
     border: 0.5px solid rgba(53, 50, 72, 0.5);
-    background-color: rgb(235, 235, 228);
+    border-color: rgb(235, 235, 228);
     color: rgb(84, 84, 84);
   }
 

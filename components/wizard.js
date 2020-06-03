@@ -51,7 +51,7 @@ const style = css`
     font-family: var(--font-support);
     letter-spacing: -.1em; /*anonymous font hack*/
     border: 1px solid #102542;
-    width: 2.2rem; 
+    width: 2.2rem;
     height: 2.2rem;
     line-height: 2.2rem;
     text-align: center;
@@ -194,7 +194,7 @@ module.exports = class Wizard extends Component {
             style="height: 3rem; width: 3rem; margin-left: -.4rem; margin-right: 1rem;"
             viewBox="0 0 50 50">
             <use
-              href="#emblem" 
+              href="#emblem"
               style="--fill: url('#iris-gradient');"/>
           </svg>
           <h1 class="m0 p0 clip w-0 h-0">DAZAAR</h1>
@@ -202,8 +202,8 @@ module.exports = class Wizard extends Component {
             style="height: 2rem;"
             title="Dazaar"
             viewBox="0 0 160 32">
-            <use 
-              href="#logo-letters"  
+            <use
+              href="#logo-letters"
               fill="hsla(var(--hue), var(--accentS),var(--accentL),1)"
             />
           </svg>
