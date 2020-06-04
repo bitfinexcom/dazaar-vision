@@ -38,6 +38,7 @@
   "dependencies": {
     "@hyperswarm/replicator": "^1.7.0",
     "@mafintosh/search-component": "^1.0.1",
+    "crypto-payment-url": "^1.0.2",
     "dazaar": "github:bitfinexcom/dazaar",
     "dazaar-payment-lightning": "github:hyperdivision/dazaar-payment-lightning",
     "hui": "^1.2.5",
@@ -55,7 +56,7 @@
   "devDependencies": {
     "browserify": "^16.5.0",
     "electron": "^8.3.1",
-    "electron-builder": "^21.2.0",
+    "electron-builder": "^22.7.0",
     "nanotron": "^2.2.0",
     "vhs-tape": "^3.2.0"
   },
