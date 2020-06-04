@@ -12,7 +12,7 @@ const style = css`
     border: none;
     border-radius: 4px;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='18' height='11' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l8 8.66L17 1' stroke='#fff' stroke-miterlimit='10'/%3E%3C/svg%3E");
+    background-image: url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2212%22%20height%3D%227%22%20viewBox%3D%220%200%2012%207%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M0.999999%201L6%206L11%201%22%20stroke%3D%22%23102542%22%2F%3E%3C%2Fsvg%3E');
     background-repeat: no-repeat;
     background-position: calc(100% - 10px) 50%;
     padding-right: 35px;
@@ -28,7 +28,6 @@ const style = css`
     color: #353248;
     background-color: white;
     border: 0.5px solid rgba(53, 50, 72, 0.1);
-    background-image: url("data:image/svg+xml,%3Csvg width='18' height='11' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l8 8.66L17 1' stroke='#353248' stroke-miterlimit='10'/%3E%3C/svg%3E");
   }
 
   :host.error {
