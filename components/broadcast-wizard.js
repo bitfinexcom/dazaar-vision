@@ -4,7 +4,6 @@ const Component = require('hui')
 const path = require('path')
 const fs = require('fs')
 const Select = require('./select')
-const Button = require('./button')
 const Input = require('./input')
 const Wizard = require('./wizard')
 const { devices } = require('../lib/webm-broadcast-stream.js')
@@ -182,7 +181,7 @@ class PaymentWizard extends Component {
       config: {
         implementation: 'lnd',
         cert: this._lightningCert.value,
-        network: LND_NETWORK,
+        network: window.LND_NETWORK,
         host: this._lightningAddress.value,
         macaroon: this._lightningMacaroon.value
       }
@@ -287,10 +286,10 @@ class QualityWizard extends Component {
         dev.kind === 'audioinput'
           ? a
           : dev.kind === 'videoinput'
-          ? v
-          : dev.kind === 'screen'
-          ? v
-          : []
+            ? v
+            : dev.kind === 'screen'
+              ? v
+              : []
 
       r.push([dev.label, dev])
     }
@@ -407,6 +406,6 @@ function loadConfig (dir) {
   return {
     host: config || '',
     cert: tryRead(path.join(dir, 'tls.cert'), 'base64'),
-    macaroon: tryRead(path.join(dir, 'data/chain/bitcoin', LND_NETWORK, 'admin.macaroon'), 'base64')
+    macaroon: tryRead(path.join(dir, 'data/chain/bitcoin', window.LND_NETWORK, 'admin.macaroon'), 'base64')
   }
 }

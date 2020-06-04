@@ -55,8 +55,7 @@ const style = css`
 module.exports = class Button extends Component {
   constructor (text, opts) {
     if (typeof opts === 'function') {
-      onclick = opts
-      opts = {}
+      opts = { onclick: opts }
     }
 
     if (!opts) opts = {}

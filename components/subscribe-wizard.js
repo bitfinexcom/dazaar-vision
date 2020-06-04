@@ -1,15 +1,11 @@
 const css = require('hui/css')
 const html = require('hui/html')
 const Component = require('hui')
-const Select = require('./select')
-const Button = require('./button')
-const Input = require('./input')
 const Wizard = require('./wizard')
 const Search = require('@mafintosh/search-component')
 const HyperIndex = require('hyperindex')
 const replicator = require('@hyperswarm/replicator')
 const nanoiterator = require('nanoiterator')
-const { devices } = require('../lib/webm-broadcast-stream.js')
 const path = require('path')
 
 const DEFAULT_INDEX = '89507965a0b27063d4b6a1c5d0db7be3a71c4237a814dc8c3fcf43de4b81e04c'
@@ -223,7 +219,7 @@ class SearchWizard extends Search {
         }
 
         // only needed cause we generated the test data wrongly
-        if (data.key && !data.id || typeof data.id === 'number') data.id = data.key
+        if ((data.key && !data.id) || typeof data.id === 'number') data.id = data.key
 
         return html`
           <div class="result-item" onclick=${onclick}>

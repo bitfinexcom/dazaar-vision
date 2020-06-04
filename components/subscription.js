@@ -7,7 +7,6 @@ const pump = require('pump')
 const Payment = require('dazaar-payment-lightning')
 const prettierBytes = require('prettier-bytes')
 const prettyMilliseconds = require('pretty-ms')
-const cpu = require('crypto-payment-url')
 const qr = require('crypto-payment-url/qrcode')
 const { clipboard } = require('electron')
 

@@ -1,9 +1,7 @@
 const css = require('hui/css')
 const html = require('hui/html')
 const Component = require('hui')
-const Select = require('./select')
 const Button = require('./button')
-const Input = require('./input')
 
 const style = css`
   :host {
@@ -103,25 +101,25 @@ const style = css`
 `
 
 module.exports = class Wizard extends Component {
-  constructor(views, opts) {
+  constructor (views, opts) {
     super()
 
     this.views = views
-    this._headline = opts && opts.title || ''
+    this._headline = (opts && opts.title) || ''
     this._selected = 0
     this.selected = 0
     this._bullets = null
     this._view = null
     this._end = this.views.length
-    this.oncancel = opts && opts.oncancel || noop
-    this.ondone = opts && opts.ondone || noop
+    this.oncancel = (opts && opts.oncancel) || noop
+    this.ondone = (opts && opts.ondone) || noop
 
     if (this.views[this._end - 1][1] === null) {
       this._end--
     }
   }
 
-  get value() {
+  get value () {
     const data = new Array(this._end)
     for (let i = 0; i < data.length; i++) {
       data[i] = this.views[i][1].value
@@ -129,7 +127,7 @@ module.exports = class Wizard extends Component {
     return data
   }
 
-  select(i) {
+  select (i) {
     if (i < 0) {
       this.oncancel()
     } else if (i >= this._end) {
@@ -140,7 +138,7 @@ module.exports = class Wizard extends Component {
     }
   }
 
-  render() {
+  render () {
     if (this._selected === this.selected) return
 
     for (let i = 0; i <= this.selected; i++) {
@@ -162,17 +160,17 @@ module.exports = class Wizard extends Component {
     }
   }
 
-  back() {
+  back () {
     this.select(this.selected - 1)
   }
 
-  next() {
+  next () {
     if (this.views[this.selected][1].validate()) {
       this.select(this.selected + 1)
     }
   }
 
-  createElement() {
+  createElement () {
     const bullets = this._bullets = this.views.map(([name], i) => {
       return html`
         <div class="bullet">
@@ -229,4 +227,4 @@ module.exports = class Wizard extends Component {
   }
 }
 
-function noop() { }
+function noop () { }

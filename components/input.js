@@ -37,8 +37,10 @@ module.exports = class Input extends Component {
   }
 
   createElement () {
-    if (!this.options.disabled && this.options.disabled !== undefined)
+    if (!this.options.disabled && this.options.disabled !== undefined) {
       delete this.options.disabled
+    }
+
     return html`
       <input
         class="p2 ${style + ' ' + (this.options.class || '')}"
