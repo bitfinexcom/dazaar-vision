@@ -4,9 +4,7 @@ const css = require('hui/css')
 
 const style = css`
   :host {
-    font-family: Open Sans;
-    font-weight: 600;
-    font-style: normal;
+    font-family: var(--font-main);
     font-size: 1rem;
     padding: 1rem 2.5rem;
     text-align: center;

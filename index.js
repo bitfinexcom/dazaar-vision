@@ -175,7 +175,7 @@ function broadcast () {
         })
       },
       ondone () {
-        let [existing, p, devices] = bw.value
+        const [existing, p, devices] = bw.value
         const payment = p && p.payment
         const config = p && p.config
 

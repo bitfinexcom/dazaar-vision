@@ -24,9 +24,7 @@ const style = css`
   :host .left .bullet {
     margin-bottom: 3rem;
     color: #353248;
-    font-family: "Open Sans";
     font-style: normal;
-    font-weight: 300;
   }
   :host .bullet:last-child {
     margin-bottom: 0;
@@ -69,7 +67,6 @@ const style = css`
     display: inline-block;
     cursor: default;
     text-decoration: none;
-    font-family: Open Sans;
     font-style: normal;
     padding: 1rem 2rem;
     padding-left: 0;
