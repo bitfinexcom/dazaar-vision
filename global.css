@@ -1,15 +1,25 @@
 /* font */
 
 @font-face {
-    font-family: 'Anonymous Pro';
-    src: url('./assets/AnonymousPro-Regular.woff2') format('woff2')
+    font-family: 'ibm_plex_sansregular';
+    src: url('./assets/ibmplexsans-regular-webfont.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
 }
 
 @font-face {
-    font-family: 'Open Sans';
-    src: url('./assets/OpenSans-Regular.woff2') format('woff2')
+    font-family: 'ibm_plex_sansregular';
+    src: url('./assets/ibmplexsans-semibold-webfont.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
 }
 
+@font-face {
+    font-family: 'ibm_plex_monoregular';
+    src: url('./assets/ibmplexmono-regular-webfont.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
 
 /* style guide variables */
 
@@ -51,8 +61,8 @@
     --blink: .15s;
     /* font variables */
     --font-size: 16px;
-    --font-main: 'Open Sans', sans-serif;
-    --font-support: 'Anonymous Pro', monospace;
+    --font-main: 'ibm_plex_sansregular', serif;
+    --font-support: 'ibm_plex_monoregular', serif;
     /**/
     --logo-gradient: linear-gradient(4deg, hsl(348, 83%, 57%) 2.53%, hsl(331, 100%, 76%) 67.18%);
 }
