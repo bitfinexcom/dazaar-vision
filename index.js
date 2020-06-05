@@ -31,7 +31,7 @@ class Settings {
   }
 
   save (cb) {
-    if (!cb) cb = (() => {})
+    if (!cb) cb = () => {}
     const p = this.settingsPath
     fs.writeFile(p + '.tmp', JSON.stringify(this.data, null, 2), function (err) {
       if (err) return cb(err)
@@ -135,12 +135,12 @@ function subscribe () {
   cycleColor = false
   const sw = new SubscribeWizard({
     settings,
-//    list (cb) {
-//      dazaar.buying(function (err, keys) {
-//        if (err) return cb(err)
-//        loadInfo(keys, true, cb)
-//      })
-//    },
+    // list (cb) {
+    //   dazaar.buying(function (err, keys) {
+    //     if (err) return cb(err)
+    //     loadInfo(keys, true, cb)
+    //   })
+    // },
     ondone () {
       const card = sw.value[0]
       const buyer = dazaar.buy(Buffer.from(card.id, 'hex'), { sparse: true })
@@ -175,7 +175,7 @@ function broadcast () {
         })
       },
       ondone () {
-        let [existing, p, devices] = bw.value
+        const [existing, p, devices] = bw.value
         const payment = p && p.payment
         const config = p && p.config
 

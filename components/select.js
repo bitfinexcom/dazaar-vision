@@ -4,6 +4,16 @@ const css = require('hui/css')
 
 const style = css`
   :host {
+    letter-spacing: 0.02em;
+    color: rgba(16, 37, 66, 0.5);
+    text-indent: 2px;
+    display: flex;
+    flex-direction: column;
+  }
+`
+
+const selectStyle = css`
+  :host {
     color: #fff;
     letter-spacing: 0.02em;
     outline: none;
@@ -12,7 +22,7 @@ const style = css`
     border: none;
     border-radius: 4px;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='18' height='11' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l8 8.66L17 1' stroke='#fff' stroke-miterlimit='10'/%3E%3C/svg%3E");
+    background-image: url('data:image/svg+xml;utf8,%3Csvg%20width%3D%2212%22%20height%3D%227%22%20viewBox%3D%220%200%2012%207%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M0.999999%201L6%206L11%201%22%20stroke%3D%22%23102542%22%2F%3E%3C%2Fsvg%3E');
     background-repeat: no-repeat;
     background-position: calc(100% - 10px) 50%;
     padding-right: 35px;
@@ -22,13 +32,13 @@ const style = css`
     border: 0.5px solid rgba(53, 50, 72, 0.5);
     border-color: rgb(235, 235, 228);
     color: rgb(84, 84, 84);
+    background-color: #f6f6f6;
   }
 
   :host.border {
     color: #353248;
     background-color: white;
     border: 0.5px solid rgba(53, 50, 72, 0.1);
-    background-image: url("data:image/svg+xml,%3Csvg width='18' height='11' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l8 8.66L17 1' stroke='#353248' stroke-miterlimit='10'/%3E%3C/svg%3E");
   }
 
   :host.error {
@@ -41,17 +51,63 @@ module.exports = class Select extends Component {
     super()
     this.entries = entries
     this.options = opts || {}
+
+    const options = []
+    if (this.options.placeholder) {
+      options.push(
+        html`
+          <option value="" disabled selected
+            >${this.options.placeholder}</option
+          >
+        `
+      )
+    }
+    for (let i = 0; i < this.entries.length; i++) {
+      options.push(
+        html`
+          <option value="${i}">${this.entries[i][0]}</option>
+        `
+      )
+    }
+    const onchange = this.options.onchange || noop
+
+    this._select = html`<select
+      onchange=${onchange}
+      class="p2 ${selectStyle +
+        ' ' +
+        (this.options.border ? 'border' : '')}"
+      >${options}</select>`
+  }
+
+  get disabled () {
+    return this._select.disabled
+  }
+
+  set disabled (v) {
+    this._select.disabled = v
+  }
+
+  get readonly () {
+    return this._select.readonly
+  }
+
+  set readonly (v) {
+    this._select.readonly = v
   }
 
   get selectedIndex () {
     return this.options.placeholder
-      ? this.element.selectedIndex - 1
-      : this.element.selectedIndex
+      ? this._select.selectedIndex - 1
+      : this._select.selectedIndex
+  }
+
+  set selectedIndex (idx) {
+    this._select.selectedIndex = idx
   }
 
   set error (val) {
-    if (val) this.element.classList.add('error')
-    else this.element.classList.remove('error')
+    if (val) this._select.classList.add('error')
+    else this._select.classList.remove('error')
   }
 
   get value () {
@@ -64,43 +120,20 @@ module.exports = class Select extends Component {
       const e = this.entries[i]
       if (e[1] === val) {
         if (this.options.placeholder) i++
-        this.element.selectedIndex = i
+        this.selectedIndex = i
         return
       }
     }
   }
 
   createElement () {
-    const opts = []
-    if (this.options.placeholder) {
-      opts.push(
-        html`
-          <option value="" disabled selected
-            >${this.options.placeholder}</option
-          >
-        `
-      )
-    }
-    for (let i = 0; i < this.entries.length; i++) {
-      opts.push(
-        html`
-          <option value="${i}">${this.entries[i][0]}</option>
-        `
-      )
-    }
-    const onchange = this.options.onchange || noop
     const el = html`
-      <select
-        onchange=${onchange}
-        class="p2 ${style +
-          ' ' +
-          (this.options.class || '') +
-          ' ' +
-          (this.options.border ? 'border' : '')}"
-        >${opts}</select
-      >
+      <label class="${style + ' ' + (this.options.class || '')}">
+        ${this.options.label}
+        ${this._select}
+      </label>
     `
-    if (this.options.disabled) el.setAttribute('disabled', 'disabled')
+
     return el
   }
 }

@@ -4,7 +4,6 @@ const Component = require('hui')
 const path = require('path')
 const fs = require('fs')
 const Select = require('./select')
-const Button = require('./button')
 const Input = require('./input')
 const Wizard = require('./wizard')
 const { devices } = require('../lib/webm-broadcast-stream.js')
@@ -80,7 +79,7 @@ class PaymentWizard extends Component {
     super()
     const self = this
     this._select = s
-    this._amount = new Input({ placeholder: 'Amount' })
+    this._amount = new Input({ label: 'Amount' })
     let prev = ''
     this._currency = new Select(
       [
@@ -88,7 +87,8 @@ class PaymentWizard extends Component {
         ['Free', 'free']
       ],
       {
-        placeholder: 'Currency',
+        label: 'Currency',
+        placeholder: 'Choose one...',
         border: true,
         onchange () {
           self.element.classList.remove(prev + '-config')
@@ -97,18 +97,18 @@ class PaymentWizard extends Component {
         }
       }
     )
-    this._perUnit = new Input({ placeholder: 'Per time interval' })
+    this._perUnit = new Input({ label: 'Per time interval' })
     this._timeUnit = new Select(
       [
         ['Seconds', 'seconds'],
         ['Minutes', 'minutes'],
         ['Hours', 'hours']
       ],
-      { border: true }
+      { label: 'Unit', border: true }
     )
 
     this._lightningDir = new Input({
-      placeholder: 'Lightning directory',
+      label: 'Lightning directory',
       type: 'file',
       webkitdirectory: true,
       onchange (e) {
@@ -121,9 +121,9 @@ class PaymentWizard extends Component {
       }
     })
 
-    this._lightningAddress = new Input({ placeholder: 'RPC Host' })
-    this._lightningMacaroon = new Input({ placeholder: 'Macaroon' })
-    this._lightningCert = new Input({ placeholder: 'TLS Cert' })
+    this._lightningAddress = new Input({ label: 'RPC Host' })
+    this._lightningMacaroon = new Input({ label: 'Macaroon' })
+    this._lightningCert = new Input({ label: 'TLS Cert' })
 
     const conf = defaultConfig && defaultConfig.LightningSats
     if (conf) {
@@ -182,7 +182,7 @@ class PaymentWizard extends Component {
       config: {
         implementation: 'lnd',
         cert: this._lightningCert.value,
-        network: LND_NETWORK,
+        network: window.LND_NETWORK,
         host: this._lightningAddress.value,
         macaroon: this._lightningMacaroon.value
       }
@@ -200,16 +200,16 @@ class PaymentWizard extends Component {
       const config = v.config
       const currency = (p && (p.currency === 'LightningSats' ? 'lnd' : p.currency)) || 'free'
 
-      this._amount.element.setAttribute('disabled', 'disabled')
+      this._amount.disabled = true
       this._amount.value = p ? p.amount : ''
-      this._currency.element.setAttribute('disabled', 'disabled')
+      this._currency.disabled = true
       this._currency.value = currency
-      this._perUnit.element.setAttribute('disabled', 'disabled')
+      this._perUnit.disabled = true
       this._perUnit.value = p ? p.interval : ''
-      this._timeUnit.element.setAttribute('disabled', 'disabled')
+      this._timeUnit.disabled = true
       this._timeUnit.value = p ? p.unit : ''
 
-      if (p.currency === 'LightningSats') {
+      if (currency === 'lnd') {
         this.element.classList.add('lnd-config')
         if (config) {
           this._lightningCert.value = config.cert
@@ -218,14 +218,14 @@ class PaymentWizard extends Component {
         }
       }
     } else {
-      this._amount.element.removeAttribute('disabled', 'disabled')
-      this._currency.element.removeAttribute('disabled', 'disabled')
-      this._perUnit.element.removeAttribute('disabled', 'disabled')
-      this._timeUnit.element.removeAttribute('disabled', 'disabled')
-      this._lightningDir.element.removeAttribute('disabled', 'disabled')
-      this._lightningCert.element.removeAttribute('disabled', 'disabled')
-      this._lightningAddress.element.removeAttribute('disabled', 'disabled')
-      this._lightningMacaroon.element.removeAttribute('disabled', 'disabled')
+      this._amount.disabled = false
+      this._currency.disabled = false
+      this._perUnit.disabled = false
+      this._timeUnit.disabled = false
+      this._lightningDir.disabled = false
+      this._lightningCert.disabled = false
+      this._lightningAddress.disabled = false
+      this._lightningMacaroon.disabled = false
     }
   }
 
@@ -260,11 +260,11 @@ class QualityWizard extends Component {
         ['Medium', 1],
         ['Low', 0]
       ],
-      { placeholder: 'Quality', border: true }
+      { label: 'Quality', border: true }
     )
-    this._video = new Select([], { placeholder: 'Video device', border: true })
-    this._audio = new Select([], { placeholder: 'Audio device', border: true })
-    this._description = new Input({ placeholder: 'Video description' })
+    this._video = new Select([], { label: 'Video device', border: true })
+    this._audio = new Select([], { label: 'Audio device', border: true })
+    this._description = new Input({ label: 'Video description' })
     this.devices = []
     devices((err, list) => {
       if (err) return console.error('device error:', err)
@@ -287,10 +287,10 @@ class QualityWizard extends Component {
         dev.kind === 'audioinput'
           ? a
           : dev.kind === 'videoinput'
-          ? v
-          : dev.kind === 'screen'
-          ? v
-          : []
+            ? v
+            : dev.kind === 'screen'
+              ? v
+              : []
 
       r.push([dev.label, dev])
     }
@@ -298,8 +298,8 @@ class QualityWizard extends Component {
     const video = this._video
     const audio = this._audio
 
-    this._video = new Select(v, { placeholder: 'Video device', border: true })
-    this._audio = new Select(a, { placeholder: 'Audio device', border: true })
+    this._video = new Select(v, { label: 'Video device', border: true })
+    this._audio = new Select(a, { label: 'Audio device', border: true })
 
     video.element.replaceWith(this._video.element)
     audio.element.replaceWith(this._audio.element)
@@ -340,21 +340,18 @@ class QualityWizard extends Component {
   check () {
     if (this._select.value) {
       const v = this._select.value
-      this._quality.element.setAttribute('disabled', 'disabled')
       this._quality.value = v.quality
-      this._video.element.setAttribute('disabled', 'disabled')
       const vi = this.devices.find(d => d.deviceId === v.video)
       if (vi) this._video.value = vi
-      this._audio.element.setAttribute('disabled', 'disabled')
       const ai = this.devices.find(d => d.deviceId === v.audio)
       if (ai) this._audio.value = ai
-      this._description.element.setAttribute('disabled', 'disabled')
+      this._description.disabled = true
       this._description.value = v.description || ''
     } else {
-      this._quality.element.removeAttribute('disabled')
-      this._video.element.removeAttribute('disabled')
-      this._audio.element.removeAttribute('disabled')
-      this._description.element.removeAttribute('disabled')
+      this._quality.disabled = false
+      this._video.disabled = false
+      this._audio.disabled = false
+      this._description.disabled = false
     }
   }
 
@@ -407,6 +404,6 @@ function loadConfig (dir) {
   return {
     host: config || '',
     cert: tryRead(path.join(dir, 'tls.cert'), 'base64'),
-    macaroon: tryRead(path.join(dir, 'data/chain/bitcoin', LND_NETWORK, 'admin.macaroon'), 'base64')
+    macaroon: tryRead(path.join(dir, 'data/chain/bitcoin', window.LND_NETWORK, 'admin.macaroon'), 'base64')
   }
 }

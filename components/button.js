@@ -4,9 +4,7 @@ const css = require('hui/css')
 
 const style = css`
   :host {
-    font-family: Open Sans;
-    font-weight: 600;
-    font-style: normal;
+    font-family: var(--font-main);
     font-size: 1rem;
     padding: 1rem 2.5rem;
     text-align: center;
@@ -55,8 +53,7 @@ const style = css`
 module.exports = class Button extends Component {
   constructor (text, opts) {
     if (typeof opts === 'function') {
-      onclick = opts
-      opts = {}
+      opts = { onclick: opts }
     }
 
     if (!opts) opts = {}
