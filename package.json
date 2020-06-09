@@ -24,13 +24,9 @@
       "category": "Office"
     },
     "files": [
-      "lib/**",
       "global.css",
-      "components/**",
       "assets/**",
-      "index.js",
       "index.bundle.js",
-      "electron.js",
       "electron-main.js",
       "index.html"
     ]
