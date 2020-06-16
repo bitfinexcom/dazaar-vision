@@ -21,6 +21,42 @@ const cls = css`
   :host.lnd-config > .lnd-config {
     display: block;
   }
+
+  :host .custom-file-input input {
+    color: transparent;
+    padding: 0;
+    border: none;
+    height: 3rem;
+  }
+  :host .custom-file-input input::-webkit-file-upload-button {
+    visibility: hidden;
+  }
+  :host .custom-file-input input::before {
+    content: 'Select directory';
+    display: block;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    padding: 0.5rem 1.25rem;
+    text-align: center;
+    letter-spacing: 0.05em;
+    background-color: #EC375B;
+    border-radius: 0.5rem;
+    border: none;
+    color: #ffffff;
+    outline: none;
+    transition: background-color 0.25s ease;
+    margin: 2px 0 0 0;
+    user-select: none;
+  }
+  :host .custom-file-input input:hover::before {
+    border-color: black;
+  }
+  :host .custom-file-input input:active {
+    outline: 0;
+  }
+  :host .custom-file-input input:active::before {
+    background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+  }
 `
 
 class SelectStreamWizard extends Component {
@@ -111,6 +147,7 @@ class PaymentWizard extends Component {
       label: 'Lightning directory',
       type: 'file',
       webkitdirectory: true,
+      class: 'custom-file-input',
       onchange (e) {
         const dir = path.dirname(this.files[0].path)
         const conf = loadConfig(dir)
