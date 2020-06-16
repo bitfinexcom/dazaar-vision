@@ -59,7 +59,7 @@
   "scripts": {
     "debug": "nanotron -e memcpy -e encoding index.js",
     "build": "browserify -u memcpy -u encoding index.js -u electron --node > index.bundle.js",
-    "dist": "npm run build && electron-builder --publish=never",
+    "dist": "npm run build && electron-builder --publish=never --mac --win --linux",
     "start": "electron electron-main.js"
   },
   "repository": {
