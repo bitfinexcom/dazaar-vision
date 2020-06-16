@@ -36,7 +36,7 @@
     "@mafintosh/search-component": "^1.0.1",
     "crypto-payment-url": "^1.0.2",
     "dazaar": "github:bitfinexcom/dazaar",
-    "dazaar-payment-lightning": "github:hyperdivision/dazaar-payment-lightning",
+    "dazaar-payment-lightning": "github:bitfinexcom/dazaar-payment-lightning",
     "hui": "^1.2.5",
     "hypercore": "^9.1.0",
     "hypercore-crypto": "^2.1.0",
