@@ -7,6 +7,8 @@ app.setName('Dazaar Vision')
 
 app.on('ready', function () {
   win = new BrowserWindow({
+    width: 1280,
+    height: 720,
     webPreferences: {
       nodeIntegration: true
     }
