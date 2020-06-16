@@ -90,6 +90,7 @@ const style = css`
   :host .results {
     margin-top: 20px;
     max-height: calc(100vh - 560px);
+    min-height: 5rem;
     overflow-y: scroll;
   }
 

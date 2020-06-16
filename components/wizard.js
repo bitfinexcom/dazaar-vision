@@ -208,7 +208,7 @@ module.exports = class Wizard extends Component {
           </div>
         </div>
         <main class="relative df p4 columns">
-          <header class="mb4">
+          <header style="margin-bottom: 10vh">
             <h3 class="m0">${this._headline}</h3>
           </header>
           <div class="flex">
