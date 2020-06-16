@@ -231,6 +231,7 @@ class PaymentWizard extends Component {
 
   createElement () {
     process.nextTick(() => this.check())
+
     return html`
       <div class=${cls}>
         <h4>Payment Options</h4>
@@ -372,6 +373,11 @@ class QualityWizard extends Component {
 module.exports = class BroadcastWizard extends Wizard {
   constructor (opts = {}) {
     const s = new SelectStreamWizard(opts.list)
+
+    opts.list((_, elms) => {
+      if (elms == null || elms.length === 0) this.next()
+    })
+
     super(
       [
         ['Select Stream', s],
