@@ -74,6 +74,7 @@ const style = css`
     left: 0;
     top: 0;
     margin: 20px;
+    min-width: 250px;
   }
 
   :host .info {
@@ -287,7 +288,8 @@ module.exports = class Subscription extends Component {
 
   createElement () {
     const amount = (this._amount = new Input({
-      placeholder: 'Enter Satoshis'
+      placeholder: 'Enter Satoshis',
+      style: 'margin: 10px auto;'
     }))
 
     const invoiceEl = this._invoiceEl = html`
