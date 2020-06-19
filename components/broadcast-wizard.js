@@ -3,9 +3,11 @@ const html = require('hui/html')
 const Component = require('hui')
 const path = require('path')
 const fs = require('fs')
+const os = require('os')
 const Select = require('./select')
 const Input = require('./input')
 const Wizard = require('./wizard')
+const HAS_ZAP = fs.existsSync('/Applications/Zap.app')
 const { devices } = require('../lib/webm-broadcast-stream.js')
 
 // allow setting this in the console
@@ -269,6 +271,11 @@ class PaymentWizard extends Component {
   createElement () {
     process.nextTick(() => this.check())
 
+    const self = this
+    const zap = HAS_ZAP
+      ? html`<a style="margin-left: 10px" href="#" onclick=${useZap}>(Use Zap.app?)</a>`
+      : ''
+
     return html`
       <div class=${cls}>
         <h4>Payment Options</h4>
@@ -276,7 +283,7 @@ class PaymentWizard extends Component {
           ${this._amount.element} ${this._currency.element}
           ${this._perUnit.element} ${this._timeUnit.element}
         </div>
-        <h4 class="lnd-config">LND Lightning Configuration</h4>
+        <h4 class="lnd-config">LND Lightning Configuration ${zap}</h4>
         <div class="configs lnd-config">
           ${this._lightningDir.element}
           ${this._lightningAddress.element}
@@ -285,6 +292,14 @@ class PaymentWizard extends Component {
         </div>
       </div>
     `
+    function useZap (e) {
+      e.preventDefault()
+      const conf = loadConfig(path.join(os.homedir(), 'Library/Application Support/Zap/lnd/bitcoin', window.LND_NETWORK, 'wallet-1'))
+
+      self._lightningAddress.value = conf.host || 'localhost:11009'
+      if (conf.cert) self._lightningCert.value = conf.cert
+      if (conf.macaroon) self._lightningMacaroon.value = conf.macaroon
+    }
   }
 }
 
