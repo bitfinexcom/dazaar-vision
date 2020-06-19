@@ -1,6 +1,6 @@
 {
   "name": "dazaar-vision",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Live stream video/audio over Dazaar",
   "main": "electron-main.js",
   "title": "Dazaar Vision",
