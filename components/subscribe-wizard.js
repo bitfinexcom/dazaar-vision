@@ -8,7 +8,7 @@ const replicator = require('@hyperswarm/replicator')
 const nanoiterator = require('nanoiterator')
 const path = require('path')
 
-const DEFAULT_INDEX = '89507965a0b27063d4b6a1c5d0db7be3a71c4237a814dc8c3fcf43de4b81e04c'
+const DEFAULT_INDEX = 'a943feb19afccebb16168094cf29601f500056ea8ad629ab601abdcb278674f8'
 
 const style = css`
   :host input[type=search] {
