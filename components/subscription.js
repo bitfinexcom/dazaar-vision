@@ -189,6 +189,7 @@ module.exports = class Subscription extends Component {
             const info = JSON.parse(data)
             // TODO: raf me
             if (info.description) self._desc.innerText = info.description
+            if (info.tail === false || info.gotoEnd === false) self._gotoEnd = false
           } catch (_) {}
         }
       })
