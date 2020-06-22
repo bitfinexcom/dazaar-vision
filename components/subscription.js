@@ -1,6 +1,7 @@
 const Button = require('./button')
 const css = require('hui/css')
 const html = require('hui/html')
+const rawHtml = require('hui/html/raw')
 const Component = require('hui')
 const Input = require('./input')
 const pump = require('pump')
@@ -9,6 +10,20 @@ const prettierBytes = require('prettier-bytes')
 const prettyMilliseconds = require('pretty-ms')
 const qr = require('crypto-payment-url/qrcode')
 const { clipboard } = require('electron')
+
+const PLAY = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="12" fill="currentColor" />
+    <path transform-origin="center" transform=" translate(1.4) scale(.6)" fill="white" d="M3 22v-20l18 10-18 10z"/>
+  </svg>
+`
+
+const PAUSE = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="12" fill="currentColor" />
+    <path transform-origin="center" transform="scale(.6)" fill="white" d="M11 22h-4v-20h4v20zm6-20h-4v20h4v-20z"/>
+  </svg>
+`
 
 const style = css`
   :host {
@@ -60,6 +75,21 @@ const style = css`
 
   :host .overlay .controls {
     background-color: rgba(92, 92, 108, 1);
+  }
+
+  :host .overlay .pause-play {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    left: calc(50% - 50px);
+    top: calc(50% - 50px);
+  }
+
+  :host .overlay .pause-play svg {
+    width: 100%;
+    height: 100%;
+    fill: rgba(92, 92, 108, 1);
+    color: rgba(92, 92, 108, 1);
   }
 
   :host .overlay .top-right {
@@ -148,6 +178,8 @@ module.exports = class Subscription extends Component {
     this._timeout = null
     this.downloadBytes = 0
     this.swarm = null
+    this.playing = true
+    this._playButtonRerender = false
     this._subscribe()
   }
 
@@ -209,6 +241,37 @@ module.exports = class Subscription extends Component {
   render () {
     this._downloaded.innerText = prettierBytes(this.downloadBytes)
     this._peers.innerText = this.swarm ? this.swarm.connections.size : 0
+
+    if (this._playButtonRerender) {
+      this._playButtonRerender = false
+      if (this.playing) {
+        this.element.querySelector('.pause-play').innerHTML = PAUSE
+      } else {
+        this.element.querySelector('.pause-play').innerHTML = PLAY
+      }
+    }
+  }
+
+  onload () {
+    this.on(document.body, 'keydown', (e) => {
+      if (e.keyCode === 32) this.togglePlay()
+    })
+
+    this.on(this.element.querySelector('.pause-play'), 'click', () => {
+      this.togglePlay()
+    })
+  }
+
+  togglePlay () {
+    this._playButtonRerender = true
+    if (this.playing) {
+      this.playing = false
+      this.element.querySelector('video').pause()
+    } else {
+      this.playing = true
+      this.element.querySelector('video').play()
+    }
+    this.update()
   }
 
   _onrequest (req, res) {
@@ -333,6 +396,9 @@ module.exports = class Subscription extends Component {
               border: true,
               onclick: this.gotoEnd.bind(this)
             }).element}
+          </div>
+          <div class="pause-play">
+            ${rawHtml(PAUSE)}
           </div>
           <div class="info top-left">
             <h3>${this._desc}</h3>
