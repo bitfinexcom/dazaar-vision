@@ -13,7 +13,7 @@ const path = require('path')
 const userDataPath = (electron.app || electron.remote.app).getPath('userData')
 const dataPath = path.join(userDataPath, './dazaar-vision-data')
 const dazaar = require('dazaar')(dataPath)
-const Payment = require('dazaar-payment-lightning')
+const Payment = require('@dazaar/payment-lightning')
 const fs = require('fs')
 const thunky = require('thunky')
 
