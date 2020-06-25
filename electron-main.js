@@ -3,6 +3,9 @@ const electron = require('electron')
 const { BrowserWindow, app } = electron
 let win
 
+const userDataDir = arg('--user-data-dir')
+if (userDataDir) process.env.DAZAAR_VISION_USER_DATA_DIR = userDataDir
+
 app.setName('Dazaar Vision')
 
 app.on('ready', function () {
@@ -66,4 +69,16 @@ function onContextMenu (event, params) {
 
   const menu = electron.Menu.buildFromTemplate(menuTpl)
   menu.popup(win)
+}
+
+function arg (name) {
+  for (const a of process.argv) {
+    if (a === name) {
+      return process.argv[process.argv.indexOf(name) + 1]
+    }
+    if (a.split('=')[0] === name) {
+      return a.split('=')[1]
+    }
+  }
+  return null
 }

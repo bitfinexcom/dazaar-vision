@@ -11,13 +11,14 @@ const crypto = require('hypercore-crypto')
 const electron = require('electron')
 const path = require('path')
 const userDataPath = (electron.app || electron.remote.app).getPath('userData')
-const dataPath = path.join(userDataPath, './dazaar-vision-data')
+const dataPath = process.env.DAZAAR_VISION_USER_DATA_DIR || path.join(userDataPath, './dazaar-vision-data')
 const dazaar = require('dazaar')(dataPath)
 const Payment = require('@dazaar/payment-lightning')
 const fs = require('fs')
 const thunky = require('thunky')
 
 let loadDefaultConfig = thunky(loadConf)
+console.log('Data path is ' + dataPath)
 
 class Settings {
   constructor (dataPath) {
