@@ -185,7 +185,7 @@ function broadcast () {
         const seller = dazaar.sell(feed, {
           validate (remoteKey, done) {
             console.log('validate', remoteKey, payment)
-            if (!payment) return done(null, { type: 'free' })
+            if (!payment) return done(null, { type: 'free', uniqueFeed: seller.uniqueFeed })
             pay.validate(remoteKey, function (err, info) {
               console.log('done', err, info)
               done(err, info)
@@ -194,6 +194,7 @@ function broadcast () {
         })
 
         if (payment) dazaar.setConfig(payment.currency, config)
+        else seller.uniqueFeed = false
 
         seller.ready(function () {
           if (payment) pay = new Payment(seller, payment, config)

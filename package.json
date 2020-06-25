@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@dazaar/payment-lightning": "^1.1.0",
-    "@hyperswarm/replicator": "^1.7.0",
+    "@hyperswarm/replicator": "^1.7.1",
     "@mafintosh/search-component": "^1.0.1",
     "crypto-payment-url": "^1.0.2",
     "dazaar": "^1.0.1",

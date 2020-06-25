@@ -4,6 +4,7 @@ const html = require('hui/html')
 const rawHtml = require('hui/html/raw')
 const Component = require('hui')
 const Input = require('./input')
+const peerSwarm = require('../lib/peer-swarm')
 const pump = require('pump')
 const Payment = require('dazaar-payment-lightning')
 const prettierBytes = require('prettier-bytes')
@@ -204,6 +205,7 @@ module.exports = class Subscription extends Component {
     this._timeout = null
     this.downloadBytes = 0
     this.swarm = null
+    this.peerSwarm = null
     this.playing = true
     this._playButtonRerender = false
     this._subscribe()
@@ -235,6 +237,15 @@ module.exports = class Subscription extends Component {
     })
 
     this.buyer.on('valid', info => {
+      if (info && info.uniqueFeed === false && !this.peerSwarm) {
+        this.peerSwarm = peerSwarm(this.buyer.feed)
+        this.peerSwarm.on('connection', () => {
+          this.update()
+        })
+        this.peerSwarm.on('disconnection', () => {
+          this.update()
+        })
+      }
       this._info.innerText = infoMessage(info)
       if (!hoverState) return
       this._timeout = setTimeout(() => this.element.classList.remove('active'), 1000)
@@ -266,7 +277,7 @@ module.exports = class Subscription extends Component {
 
   render () {
     this._downloaded.innerText = prettierBytes(this.downloadBytes)
-    this._peers.innerText = this.swarm ? this.swarm.connections.size : 0
+    this._peers.innerText = (this.swarm ? this.swarm.connections.size : 0) + (this.peerSwarm ? this.peerSwarm.connections.size : 0)
 
     if (this._playButtonRerender) {
       this._playButtonRerender = false
@@ -331,6 +342,7 @@ module.exports = class Subscription extends Component {
   stop () {
     if (this.buyer.feed) this.buyer.feed.close()
     if (this.swarm) this.swarm.destroy()
+    if (this.peerSwarm) this.peerSwarm.destroy()
     if (this._server) this._server.close()
     const video = this.element.querySelector('video')
     video.src = ''
