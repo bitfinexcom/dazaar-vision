@@ -10,6 +10,32 @@ const prettierBytes = require('prettier-bytes')
 const prettyMilliseconds = require('pretty-ms')
 const qr = require('crypto-payment-url/qrcode')
 const { clipboard } = require('electron')
+const { Readable } = require('streamx')
+
+class Throttle extends Readable {
+  constructor (feed, start) {
+    super()
+    this.feed = feed
+    this.start = start
+    this.range = feed.download({ start, end: start + 16, linear: true })
+  }
+
+  _read (cb) {
+    const start = this.start
+    this.feed.undownload(this.range)
+    this.range = this.feed.download({ start, end: start + 16, linear: true })
+    this.feed.get(this.start++, (err, data) => {
+      if (err) return cb(err)
+      this.push(data)
+      cb(null)
+    })
+  }
+
+  _destroy (cb) {
+    this.feed.undownload(this.range)
+    cb(null)
+  }
+}
 
 const PLAY = `
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -286,20 +312,10 @@ module.exports = class Subscription extends Component {
         let start = Math.max(2, feed.length - 1)
         if (!this._gotoEnd) start = 2
 
-        const stream = feed.createReadStream({
-          start,
-          live: true
-        })
+        const stream = new Throttle(feed, start)
 
         this.currentFrame = start
         this._serverStream = stream
-
-        stream.on('data', () => {
-          if (stream === this._serverStream) {
-            this.currentFrame = start++
-            this.update()
-          }
-        })
 
         pump(stream, res)
       })

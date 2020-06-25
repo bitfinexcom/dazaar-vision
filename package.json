@@ -47,6 +47,7 @@
     "prettier-bytes": "^1.0.4",
     "pretty-ms": "^5.0.0",
     "pump": "^3.0.0",
+    "streamx": "^2.6.4",
     "thunky": "^1.1.0",
     "webm-cluster-stream": "^1.0.0"
   },
