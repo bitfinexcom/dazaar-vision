@@ -115,6 +115,7 @@ module.exports = class Broadcast extends Component {
     this.timeout = null
     this.recording = null
     this._server = null
+    this.swarm = null
     this.uploadedBytes = 0
     this._uploaded = html`
       <span>0 B</span>
@@ -227,6 +228,7 @@ module.exports = class Broadcast extends Component {
     video.src = ''
 
     if (this.swarm) this.swarm.destroy()
+
     this.seller.feed.close(() => {
       this._server.close()
       this._server.on('close', () => {
